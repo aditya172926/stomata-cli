@@ -12,7 +12,9 @@ use stomata_core::collectors::structs::{
 
 use crate::{
     renders::{
-        displays::display_single_process::SingleProcessDisplay,
+        displays::{
+            display_network::display_network_stats, display_single_process::SingleProcessDisplay,
+        },
         render_widgets::{
             render_gauge::render_gauge, render_paragraph::paragraph_widget,
             render_table::render_table,
@@ -109,6 +111,9 @@ impl App {
                         &mut self.ui_state,
                     );
                 }
+            }
+            Page::Network => {
+                let _ = display_network_stats(frame, chunks[1]);
             }
         }
     }
@@ -284,6 +289,10 @@ impl App {
             KeyCode::Char('3') => {
                 self.tab_index = 2;
                 self.current_page = Page::Processes;
+            }
+            KeyCode::Char('4') => {
+                self.tab_index = 3;
+                self.current_page = Page::Network;
             }
             _ => {}
         }

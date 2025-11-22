@@ -26,11 +26,12 @@ pub enum Page {
     Metrics,
     Processes,
     SingleProcess(ProcessData), // pid
+    Network,
 }
 
 impl Page {
     pub fn titles() -> Vec<&'static str> {
-        vec!["System", "Metrics", "Processes"]
+        vec!["System", "Metrics", "Processes", "Network"]
     }
 
     pub fn from_index(index: usize) -> Self {
@@ -38,6 +39,7 @@ impl Page {
             0 => Page::System,
             1 => Page::Metrics,
             2 => Page::Processes,
+            3 => Page::Network,
             _ => Page::System,
         }
     }
