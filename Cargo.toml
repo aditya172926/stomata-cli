@@ -1,7 +1,8 @@
 [workspace]
 members = [
     "stomata-core",
-    "stomata-cli"
+    "stomata-cli", 
+    "stomata-web3"
 ]
 
 resolver = "3"   # use edition 2024 feature resolver

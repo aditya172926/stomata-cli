@@ -1,2 +1,2 @@
-pub mod displays;
+pub mod core_displays;
 pub mod render_widgets;

@@ -2,7 +2,7 @@ use ratatui::{Frame, layout::Rect};
 use stomata_core::collectors::SystemInfo;
 
 use crate::{
-    renders::{displays::traits::Display, render_widgets::render_paragraph::paragraph_widget},
+    renders::{core_displays::traits::Display, render_widgets::render_paragraph::paragraph_widget},
     structs::UIState,
 };
 

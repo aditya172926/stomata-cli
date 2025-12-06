@@ -1,0 +1,19 @@
+[package]
+name = "stomata-web3"
+version = "0.0.1"
+description = "Web3 library to work with Stomata cli or used independently"
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+keywords = ["web3", "tools", "monitoring", "cli"]
+readme = "./README.md"
+categories = ["development-tools::tooling"]
+
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+hex = "0.4.3"
+sha3 = "0.10.8"

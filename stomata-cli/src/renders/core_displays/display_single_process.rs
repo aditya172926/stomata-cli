@@ -1,6 +1,6 @@
 use crate::{
     renders::{
-        displays::traits::SingleProcessDisplay,
+        core_displays::traits::SingleProcessDisplay,
         render_widgets::{
             render_gauge::render_gauge, render_paragraph::paragraph_widget,
             render_sparkline::render_sparkline, render_table::render_table,

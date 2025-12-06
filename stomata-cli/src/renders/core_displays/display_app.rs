@@ -9,7 +9,7 @@ use ratatui::{
 use stomata_core::collectors::structs::{Metrics, MetricsToFetch, StomataSystemMetrics};
 
 use crate::{
-    renders::displays::traits::{Display, SingleProcessDisplay},
+    renders::core_displays::traits::{Display, SingleProcessDisplay},
     structs::{Page, SingleProcessUI, UIState},
     utils::bytes_to_mb,
 };

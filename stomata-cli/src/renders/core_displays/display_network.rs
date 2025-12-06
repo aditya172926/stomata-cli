@@ -8,7 +8,7 @@ use stomata_core::NetworkMetrics;
 
 use crate::{
     renders::{
-        displays::traits::Display,
+        core_displays::traits::Display,
         render_widgets::{render_paragraph::paragraph_widget, render_sparkline::render_sparkline},
     },
     structs::{NetworkInterfaceData, UIState},

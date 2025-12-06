@@ -1,0 +1,1 @@
+pub const EVM_ADDRESS_HEX_LENGTH: usize = 42;

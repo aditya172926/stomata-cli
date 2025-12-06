@@ -6,7 +6,7 @@ use stomata_core::collectors::system::metrics::SystemCollector;
 
 use crate::{
     renders::{
-        displays::traits::Display,
+        core_displays::traits::Display,
         render_widgets::{render_gauge::render_gauge, render_paragraph::paragraph_widget},
     },
     structs::UIState,

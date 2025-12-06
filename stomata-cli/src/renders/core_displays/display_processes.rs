@@ -2,7 +2,7 @@ use ratatui::{Frame, layout::Rect};
 use stomata_core::collectors::process::metrics::ProcessData;
 
 use crate::{
-    renders::{displays::traits::Display, render_widgets::render_table::render_table},
+    renders::{core_displays::traits::Display, render_widgets::render_table::render_table},
     structs::UIState,
 };
 

@@ -1,6 +1,6 @@
 use std::time::{Duration, Instant};
 
-use crate::{renders::displays::display_app::App, structs::Cli};
+use crate::{renders::core_displays::display_app::App, structs::Cli};
 use clap::Parser;
 use ratatui::crossterm::event::{self, Event};
 
