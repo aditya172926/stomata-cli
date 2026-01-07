@@ -2,7 +2,7 @@
 name = "stomata-cli"
 description = "CLI tool for collecting and visualizing system metrics"
 license.workspace = true
-version = "0.2.1"
+version = "0.2.2"
 edition = "2024"
 authors.workspace = true
 repository.workspace = true
