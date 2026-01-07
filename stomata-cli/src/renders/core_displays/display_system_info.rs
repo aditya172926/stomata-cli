@@ -51,12 +51,21 @@ impl Display for SystemInfo {
         area: Rect,
         _ui_state: Option<&mut UIState>,
     ) -> anyhow::Result<()> {
+        let logo = r#"
+███████╗████████╗ ██████╗ ███╗   ███╗ █████╗ ████████╗ █████╗ 
+██╔════╝╚══██╔══╝██╔═══██╗████╗ ████║██╔══██╗╚══██╔══╝██╔══██╗
+███████╗   ██║   ██║   ██║██╔████╔██║███████║   ██║   ███████║
+╚════██║   ██║   ██║   ██║██║╚██╔╝██║██╔══██║   ██║   ██╔══██║
+███████║   ██║   ╚██████╔╝██║ ╚═╝ ██║██║  ██║   ██║   ██║  ██║
+╚══════╝   ╚═╝    ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
+"#;
+
         let mut system_info_str = format!(
-            "\n\n\n\n\nOS name: {}\nOS version: {}\nKernel Version: {}\nHostname: {}",
+            "\n{logo}\n\nOS name: {}\nOS version: {}\nKernel Version: {}\nHostname: {}",
             self.os_name, self.os_version, self.kernel_version, self.hostname
         );
 
-        let helper_instructions = "\n\n\n\n\n\n\nSwitch Tabs: Use number keys OR Tab btn OR <-, -> arrow keys\nMove selector: Up. Down arrow keys\nSelect: Enter key";
+        let helper_instructions = "\n\n\nSwitch Tabs: Use number keys OR Tab btn OR <-, -> arrow keys\nMove selector: Up. Down arrow keys\nSelect: Enter key";
         system_info_str.push_str(helper_instructions);
         let paragraph = paragraph_widget(&system_info_str, "System Info");
         frame.render_widget(
