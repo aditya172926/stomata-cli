@@ -1,15 +1,43 @@
+use std::{collections::HashMap, fs};
+
+use anyhow::Result;
 use sysinfo::{Pid, Process, System};
 
-use crate::collectors::process::metrics::{ProcessData, SingleProcessData};
+use crate::collectors::process::metrics::{CgroupInfo, ProcessData, SingleProcessData};
 
 impl From<&Process> for ProcessData {
     fn from(process: &Process) -> Self {
+        let pid = process.pid().as_u32();
+        let cgroups = match Self::read_cgroups(pid) {
+            Ok(cg) => cg,
+            Err(_err) => {
+                vec![CgroupInfo::default()]
+            }
+        };
+        
+        // controller to path mapping
+        let mut controller_map = HashMap::new();
+        let mut primary_path = String::from("/");
+
+        for cgroup in &cgroups {
+            for controller in &cgroup.controllers {
+                controller_map.insert(controller.clone(), cgroup.path.clone());
+            }
+
+            // using unified hierarchy (hierarchy_id == 0) or systemd as primary
+            if cgroup.hierarchy_id == 0 || cgroup.controllers.contains(&"systemd".to_string()) {
+                primary_path = cgroup.path.clone();
+            }
+        }
+
         ProcessData {
-            pid: process.pid().as_u32(),
+            pid,
             name: process.name().to_string_lossy().to_string(),
             cpu_usage: process.cpu_usage(),
             memory: process.memory(),
             status: process.status().to_string(),
+            cgroup_path: primary_path,
+            cgroup_controllers: controller_map
         }
     }
 }
@@ -19,6 +47,32 @@ impl ProcessData {
         let processes: Vec<ProcessData> =
             system.processes().values().map(ProcessData::from).collect();
         return processes;
+    }
+
+    // read group information for a specific pid
+    pub fn read_cgroups(pid: u32) -> Result<Vec<CgroupInfo>> {
+        let cgroup_path = format!("proc/{}/cgroup", pid);
+        let contents = fs::read_to_string(cgroup_path)?;
+        let cgroups: Vec<CgroupInfo> = contents.lines().filter_map(|line| {
+            let parts: Vec<&str> = line.split(':').collect();
+            if parts.len() == 3 {
+                let controllers: Vec<String> = if parts[1].is_empty() {
+                    vec!["unified".to_string()]
+                } else {
+                    parts[1].split(',').map(String::from).collect()
+                };
+
+                Some(CgroupInfo {
+                    hierarchy_id: parts[0].parse().ok()?,
+                    controllers,
+                    path: parts[2].to_string()
+                })
+            } else {
+                None
+            }
+        }).collect();
+
+        Ok(cgroups)
     }
 }
 
