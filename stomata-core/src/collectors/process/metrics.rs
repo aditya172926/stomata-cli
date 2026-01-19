@@ -10,7 +10,7 @@ pub struct ProcessData {
     pub memory: u64,
     pub status: String,
     pub cgroup_path: String,
-    pub cgroup_controllers: HashMap<String, String> // mapping controller to path
+    pub cgroup_controllers: HashMap<String, String>, // mapping controller to path
 }
 
 #[derive(Debug)]
@@ -19,7 +19,7 @@ pub struct CgroupTree {
     pub processes: Vec<ProcessData>,
     pub children: HashMap<String, CgroupTree>,
     pub total_cpu: f32,
-    total_memory: u64
+    total_memory: u64,
 }
 
 #[derive(Default, Clone)]
@@ -37,5 +37,5 @@ pub struct SingleProcessData<'a> {
 pub struct CgroupInfo {
     pub hierarchy_id: u32,
     pub controllers: Vec<String>,
-    pub path: String
+    pub path: String,
 }

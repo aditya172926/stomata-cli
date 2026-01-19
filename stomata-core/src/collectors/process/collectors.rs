@@ -14,7 +14,7 @@ impl From<&Process> for ProcessData {
                 vec![CgroupInfo::default()]
             }
         };
-        
+
         // controller to path mapping
         let mut controller_map = HashMap::new();
         let mut primary_path = String::from("/");
@@ -37,7 +37,7 @@ impl From<&Process> for ProcessData {
             memory: process.memory(),
             status: process.status().to_string(),
             cgroup_path: primary_path,
-            cgroup_controllers: controller_map
+            cgroup_controllers: controller_map,
         }
     }
 }
@@ -53,24 +53,27 @@ impl ProcessData {
     pub fn read_cgroups(pid: u32) -> Result<Vec<CgroupInfo>> {
         let cgroup_path = format!("proc/{}/cgroup", pid);
         let contents = fs::read_to_string(cgroup_path)?;
-        let cgroups: Vec<CgroupInfo> = contents.lines().filter_map(|line| {
-            let parts: Vec<&str> = line.split(':').collect();
-            if parts.len() == 3 {
-                let controllers: Vec<String> = if parts[1].is_empty() {
-                    vec!["unified".to_string()]
-                } else {
-                    parts[1].split(',').map(String::from).collect()
-                };
+        let cgroups: Vec<CgroupInfo> = contents
+            .lines()
+            .filter_map(|line| {
+                let parts: Vec<&str> = line.split(':').collect();
+                if parts.len() == 3 {
+                    let controllers: Vec<String> = if parts[1].is_empty() {
+                        vec!["unified".to_string()]
+                    } else {
+                        parts[1].split(',').map(String::from).collect()
+                    };
 
-                Some(CgroupInfo {
-                    hierarchy_id: parts[0].parse().ok()?,
-                    controllers,
-                    path: parts[2].to_string()
-                })
-            } else {
-                None
-            }
-        }).collect();
+                    Some(CgroupInfo {
+                        hierarchy_id: parts[0].parse().ok()?,
+                        controllers,
+                        path: parts[2].to_string(),
+                    })
+                } else {
+                    None
+                }
+            })
+            .collect();
 
         Ok(cgroups)
     }
