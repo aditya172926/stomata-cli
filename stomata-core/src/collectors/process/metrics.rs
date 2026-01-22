@@ -19,7 +19,7 @@ pub struct CgroupTree {
     pub processes: Vec<ProcessData>,
     pub children: HashMap<String, CgroupTree>,
     pub total_cpu: f32,
-    total_memory: u64,
+    pub total_memory: u64,
 }
 
 #[derive(Default, Clone)]
