@@ -50,9 +50,9 @@ impl ChainProvider for EVMProvider {
         Ok(ChainInfo { chain_id: id })
     }
 
-    async fn native_balance(&self, address: String) -> anyhow::Result<rust_decimal::Decimal> {
+    async fn native_balance(&self) -> anyhow::Result<rust_decimal::Decimal> {
         let hex_balance: String =
-            rpc_call(&self.rpc_url, "eth_getBalance", json!([address, "latest"])).await?;
+            rpc_call(&self.rpc_url, "eth_getBalance", json!([self.address, "latest"])).await?;
 
         Ok(Decimal::from_str_exact(&hex_balance)?)
     }
