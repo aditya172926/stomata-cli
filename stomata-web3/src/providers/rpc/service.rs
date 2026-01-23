@@ -70,7 +70,7 @@ mod tests {
         let rpc_url = std::env::var("ETHEREUM_MAINNET_RPC_URL").expect("Ethereum mainnet rpc not found in env");
         let user_address = std::env::var("TEST_EVM_ADDRESS").expect("Test evm address not found in env");
         let evm_provider = EVMProvider::new(user_address, rpc_url);
-        let chain_id = evm_provider.chain_info().await;
-        println!("{:?}", chain_id);
+        let chain_info = evm_provider.chain_info().await.unwrap();
+        assert!(chain_info.chain_id == 1)
     }
 }
