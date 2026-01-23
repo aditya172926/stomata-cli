@@ -5,7 +5,7 @@ use serde::de::DeserializeOwned;
 use serde_json::{Value, json};
 
 use crate::providers::{
-    portfolio::structs::ChainInfo,
+    portfolio::structs::{AccountType, ChainInfo},
     rpc::{helper::parse_hex_u128, structs::EVMProvider, traits::ChainProvider},
 };
 
@@ -64,6 +64,21 @@ impl ChainProvider for EVMProvider {
             Err(err) => None,
         }
     }
+
+    async fn account_type(&self) -> Option<AccountType> {
+        let code: String = rpc_call(
+            &self.rpc_url,
+            "eth_getCode",
+            json!([self.address, "latest"]),
+        )
+        .await.unwrap();
+
+        if code.len() == 0 {
+            Some(AccountType::EOA)
+        } else {
+            Some(AccountType::CONTRACT)
+        }
+    }
 }
 
 #[cfg(test)]
@@ -92,5 +107,12 @@ mod tests {
         let evm_provider = init_evm_provider();
         let native_balance = evm_provider.native_balance().await;
         assert!(native_balance.is_some(), "Failed to fetch native balance");
+    }
+
+    #[tokio::test]
+    async fn test_account_type() {
+        let evm_provider = init_evm_provider();
+        let account_type = evm_provider.account_type().await;
+        assert!(account_type.is_some(), "Failed to fetch account_type");
     }
 }
