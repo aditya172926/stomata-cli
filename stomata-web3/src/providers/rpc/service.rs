@@ -6,7 +6,7 @@ use serde_json::{Value, json};
 
 use crate::providers::{
     portfolio::structs::ChainInfo,
-    rpc::{structs::EVMProvider, traits::ChainProvider},
+    rpc::{helper::parse_hex_u128, structs::EVMProvider, traits::ChainProvider},
 };
 
 async fn rpc_call<T: DeserializeOwned>(rpc_url: &str, method: &str, params: Value) -> Result<T> {
@@ -50,11 +50,19 @@ impl ChainProvider for EVMProvider {
         Ok(ChainInfo { chain_id: id })
     }
 
-    async fn native_balance(&self) -> anyhow::Result<rust_decimal::Decimal> {
-        let hex_balance: String =
-            rpc_call(&self.rpc_url, "eth_getBalance", json!([self.address, "latest"])).await?;
-
-        Ok(Decimal::from_str_exact(&hex_balance)?)
+    async fn native_balance(&self) -> Option<Decimal> {
+        let hex_balance: String = rpc_call(
+            &self.rpc_url,
+            "eth_getBalance",
+            json!([self.address, "latest"]),
+        )
+        .await
+        .unwrap();
+        println!("Hex balance {:?}", hex_balance);
+        match parse_hex_u128(&hex_balance) {
+            Ok(val) => Some(val.into()),
+            Err(err) => None,
+        }
     }
 }
 
@@ -63,14 +71,26 @@ mod tests {
     use super::*;
     use dotenv::dotenv;
 
+    fn init_evm_provider() -> EVMProvider {
+        dotenv().ok();
+        let rpc_url = std::env::var("ETHEREUM_MAINNET_RPC_URL")
+            .expect("Ethereum mainnet rpc not found in env");
+        let user_address =
+            std::env::var("TEST_EVM_ADDRESS").expect("Test evm address not found in env");
+        EVMProvider::new(user_address, rpc_url)
+    }
+
     #[tokio::test]
     async fn test_chain_id_fetch() {
-        dotenv().ok();
-
-        let rpc_url = std::env::var("ETHEREUM_MAINNET_RPC_URL").expect("Ethereum mainnet rpc not found in env");
-        let user_address = std::env::var("TEST_EVM_ADDRESS").expect("Test evm address not found in env");
-        let evm_provider = EVMProvider::new(user_address, rpc_url);
+        let evm_provider = init_evm_provider();
         let chain_info = evm_provider.chain_info().await.unwrap();
         assert!(chain_info.chain_id == 1)
+    }
+
+    #[tokio::test]
+    async fn test_native_balance_fetch() {
+        let evm_provider = init_evm_provider();
+        let native_balance = evm_provider.native_balance().await;
+        assert!(native_balance.is_some(), "Failed to fetch native balance");
     }
 }
