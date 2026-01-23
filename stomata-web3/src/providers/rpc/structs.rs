@@ -4,7 +4,7 @@ pub struct EVMProvider {
 }
 
 impl EVMProvider {
-    fn new(address: String, rpc_url: String) -> Self {
+    pub fn new(address: String, rpc_url: String) -> Self {
         Self { address, rpc_url }
     }
 }

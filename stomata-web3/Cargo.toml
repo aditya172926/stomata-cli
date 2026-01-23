@@ -27,3 +27,7 @@ chrono.workspace = true
 rust_decimal.workspace = true
 anyhow.workspace = true
 reqwest.workspace = true
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+dotenv = "0.15.0"

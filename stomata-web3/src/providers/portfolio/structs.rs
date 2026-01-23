@@ -5,6 +5,7 @@ pub struct Inputs {
     pub user_address: String,
 }
 
+#[derive(Debug)]
 pub struct ChainInfo {
     pub chain_id: u64,
 }

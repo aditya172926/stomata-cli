@@ -57,3 +57,20 @@ impl ChainProvider for EVMProvider {
         Ok(Decimal::from_str_exact(&hex_balance)?)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use dotenv::dotenv;
+
+    #[tokio::test]
+    async fn test_chain_id_fetch() {
+        dotenv().ok();
+
+        let rpc_url = std::env::var("ETHEREUM_MAINNET_RPC_URL").expect("Ethereum mainnet rpc not found in env");
+        let user_address = std::env::var("TEST_EVM_ADDRESS").expect("Test evm address not found in env");
+        let evm_provider = EVMProvider::new(user_address, rpc_url);
+        let chain_id = evm_provider.chain_info().await;
+        println!("{:?}", chain_id);
+    }
+}
