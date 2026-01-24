@@ -225,6 +225,7 @@ impl Web3State {
             }
             KeyCode::Char('2') => {
                 self.tab_index = 1;
+                // fetch the pre-requisit data
                 self.current_page = Web3Page::Portfolio;
             }
             _ => {}
@@ -296,7 +297,7 @@ pub fn run(
                         // handle events
                         web3_state.handle_events(key)?;
                         // redraw immediately after an event
-                        terminal.draw( |frame| {
+                        terminal.draw(|frame| {
                             web3_state.render(frame);
                         })?;
                     }
@@ -304,7 +305,7 @@ pub fn run(
 
                 if last_tick.elapsed() >= refresh_interval {
                     // draw
-                    terminal.draw( |frame| {
+                    terminal.draw(|frame| {
                         web3_state.render(frame);
                     })?;
                     last_tick = Instant::now();

@@ -15,7 +15,8 @@ mod stomata_state;
 mod structs;
 mod utils;
 
-fn main() -> anyhow::Result<()> {
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
     let enable_ui = cli.interactive;
     let mut app = StomataState::new();
