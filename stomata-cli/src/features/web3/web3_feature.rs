@@ -193,9 +193,9 @@ impl Web3State {
     /// # Errors
     ///
     /// Returns an error if event processing fails.
-    pub fn handle_events(&mut self, key: KeyEvent) -> anyhow::Result<()> {
+    pub async fn handle_events(&mut self, key: KeyEvent) -> anyhow::Result<()> {
         if key.kind == KeyEventKind::Press {
-            self.process_global_events(key);
+            self.process_global_events(key).await;
         }
         Ok(())
     }
@@ -208,7 +208,7 @@ impl Web3State {
     /// # Arguments
     ///
     /// * `key` - The keyboard event to process
-    fn process_global_events(&mut self, key: KeyEvent) {
+    async fn process_global_events(&mut self, key: KeyEvent) {
         match key.code {
             KeyCode::Char('q') => {
                 self.render = false;
@@ -273,7 +273,7 @@ impl Web3State {
 /// let mut terminal = setup_terminal()?;
 /// run(&cli, Some(&mut terminal))?;
 /// ```
-pub fn run(
+pub async fn run(
     cli: &Cli,
     terminal: Option<&mut Terminal<CrosstermBackend<Stdout>>>,
 ) -> anyhow::Result<bool> {
@@ -295,7 +295,7 @@ pub fn run(
                 if event::poll(timeout)? {
                     if let Event::Key(key) = event::read()? {
                         // handle events
-                        web3_state.handle_events(key)?;
+                        web3_state.handle_events(key).await?;
                         // redraw immediately after an event
                         terminal.draw(|frame| {
                             web3_state.render(frame);

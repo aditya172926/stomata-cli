@@ -40,7 +40,7 @@ async fn main() -> anyhow::Result<()> {
                 }
                 AppState::RunningFeature(feature) => {
                     // Run the selected feature
-                    match run_feature(feature, &cli, Some(&mut terminal)) {
+                    match run_feature(feature, &cli, Some(&mut terminal)).await {
                         Ok(render) => {
                             if !render {
                                 app.state = AppState::FeatureSelection;
