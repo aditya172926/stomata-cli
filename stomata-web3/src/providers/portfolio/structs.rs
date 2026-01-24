@@ -13,11 +13,11 @@ pub struct ChainInfo {
 #[derive(Debug)]
 pub enum AccountType {
     EOA,
-    CONTRACT
+    CONTRACT,
 }
 
 pub struct Portfolio {
     pub account_type: AccountType,
     pub native_balance: Decimal,
-    pub transaction_count: u64
+    pub transaction_count: u64,
 }

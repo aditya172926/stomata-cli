@@ -71,7 +71,8 @@ impl ChainProvider for EVMProvider {
             "eth_getCode",
             json!([self.address, "latest"]),
         )
-        .await.unwrap();
+        .await
+        .unwrap();
 
         if code.len() == 0 {
             Some(AccountType::EOA)
@@ -84,8 +85,10 @@ impl ChainProvider for EVMProvider {
         let transaction_count: String = rpc_call(
             &self.rpc_url,
             "eth_getTransactionCount",
-            json!([self.address, "latest"])
-        ).await.unwrap();
+            json!([self.address, "latest"]),
+        )
+        .await
+        .unwrap();
 
         u64::from_str_radix(transaction_count.trim_start_matches("0x"), 16).unwrap()
     }

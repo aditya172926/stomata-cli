@@ -11,6 +11,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04
+    env:
+      ETHEREUM_MAINNET_RPC_URL: ${{ secrets.ETHEREUM_MAINNET_RPC_URL }}
+      TEST_EVM_ADDRESS: ${{ secrets.TEST_EVM_ADDRESS }}
 
     steps:
       - name: Checkout repo
