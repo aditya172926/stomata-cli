@@ -62,7 +62,6 @@ impl ChainProvider for EVMProvider {
         )
         .await
         .unwrap();
-        println!("Hex balance {:?}", hex_balance);
         match parse_hex_u128(&hex_balance) {
             Ok(val) => Some(val.into()),
             Err(err) => None,
