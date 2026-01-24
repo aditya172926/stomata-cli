@@ -7,4 +7,5 @@ pub trait ChainProvider {
     async fn chain_info(&self) -> Result<ChainInfo>;
     async fn native_balance(&self) -> Option<Decimal>;
     async fn account_type(&self) -> Option<AccountType>;
+    async fn transaction_count(&self) -> u64;
 }

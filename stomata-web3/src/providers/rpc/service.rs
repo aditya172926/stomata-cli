@@ -79,6 +79,16 @@ impl ChainProvider for EVMProvider {
             Some(AccountType::CONTRACT)
         }
     }
+
+    async fn transaction_count(&self) -> u64 {
+        let transaction_count: String = rpc_call(
+            &self.rpc_url,
+            "eth_getTransactionCount",
+            json!([self.address, "latest"])
+        ).await.unwrap();
+
+        u64::from_str_radix(transaction_count.trim_start_matches("0x"), 16).unwrap()
+    }
 }
 
 #[cfg(test)]
@@ -114,5 +124,12 @@ mod tests {
         let evm_provider = init_evm_provider();
         let account_type = evm_provider.account_type().await;
         assert!(account_type.is_some(), "Failed to fetch account_type");
+    }
+
+    #[tokio::test]
+    async fn test_transaction_count() {
+        let evm_provider = init_evm_provider();
+        let nonce: u64 = evm_provider.transaction_count().await;
+        assert!(nonce > 0, "Failed to fetch transaction count");
     }
 }
