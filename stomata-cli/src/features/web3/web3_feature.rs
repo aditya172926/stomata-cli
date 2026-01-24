@@ -21,10 +21,15 @@ use ratatui::{
     text::Line,
     widgets::{Block, Borders, Tabs},
 };
+use stomata_web3::providers::{
+    portfolio::{service::get_portfolio, structs::Portfolio},
+    rpc::structs::EVMProvider,
+};
 
 use crate::{
     features::web3::cli::{KeySubCommands, Web3Cli, Web3Tool},
     renders::{
+        core_displays::traits::Display,
         render_widgets::render_paragraph::paragraph_widget,
         web3_displays::{
             address_validation::validate_address,
@@ -128,7 +133,7 @@ impl Web3State {
     /// # Arguments
     ///
     /// * `frame` - The ratatui frame to render into
-    pub fn render(&mut self, frame: &mut Frame) {
+    pub fn render(&mut self, frame: &mut Frame<'_>) {
         let chunks =
             Layout::vertical([Constraint::Length(3), Constraint::Min(0)]).split(frame.area());
 
@@ -144,7 +149,15 @@ impl Web3State {
                 frame.render_widget(para, chunks[1]);
             }
             Web3Page::Portfolio => {
-                let para = paragraph_widget("Setting up a simple portfolio", "Portfolio");
+                // let provider = EVMProvider::new(
+                //     "0xdadB0d80178819F2319190D340ce9A924f783711".to_string(),
+                //     "https://rpc.fullsend.to".to_string(),
+                // );
+                // portfolio.display(frame, chunks[1], None);
+                let para = paragraph_widget(
+                    "Hi! We are adding more interactive features to Stomata Web3",
+                    "About",
+                );
                 frame.render_widget(para, chunks[1]);
             }
         }
@@ -283,13 +296,17 @@ pub fn run(
                         // handle events
                         web3_state.handle_events(key)?;
                         // redraw immediately after an event
-                        terminal.draw(|frame| web3_state.render(frame))?;
+                        terminal.draw( |frame| {
+                            web3_state.render(frame);
+                        })?;
                     }
                 }
 
                 if last_tick.elapsed() >= refresh_interval {
                     // draw
-                    terminal.draw(|frame| web3_state.render(frame))?;
+                    terminal.draw( |frame| {
+                        web3_state.render(frame);
+                    })?;
                     last_tick = Instant::now();
                 }
             }

@@ -485,3 +485,23 @@ where
         self.push(clamped);
     }
 }
+
+/////////////////////////
+/// Input Widget Structs
+/////////////////////////
+pub enum InputMode {
+    Normal,
+    Editing,
+}
+
+/// Input Widget state
+pub struct InputWidgetState {
+    /// Current value of input box
+    pub input: String,
+    /// Position of cursor in input box
+    pub character_index: usize,
+    /// Current input mode
+    pub input_mode: InputMode,
+    /// Recoded message history
+    pub messages: Vec<String>,
+}
