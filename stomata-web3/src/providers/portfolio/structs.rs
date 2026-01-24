@@ -6,11 +6,6 @@ pub struct Inputs {
 }
 
 #[derive(Debug)]
-pub struct ChainInfo {
-    pub chain_id: u64,
-}
-
-#[derive(Debug)]
 pub enum AccountType {
     EOA,
     CONTRACT,

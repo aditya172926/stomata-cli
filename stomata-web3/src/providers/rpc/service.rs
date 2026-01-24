@@ -5,8 +5,12 @@ use serde::de::DeserializeOwned;
 use serde_json::{Value, json};
 
 use crate::providers::{
-    portfolio::structs::{AccountType, ChainInfo},
-    rpc::{helper::parse_hex_u128, structs::EVMProvider, traits::ChainProvider},
+    portfolio::structs::AccountType,
+    rpc::{
+        helper::parse_hex_u128,
+        structs::{ChainInfo, EVMProvider},
+        traits::ChainProvider,
+    },
 };
 
 async fn rpc_call<T: DeserializeOwned>(rpc_url: &str, method: &str, params: Value) -> Result<T> {
@@ -41,7 +45,7 @@ async fn rpc_call<T: DeserializeOwned>(rpc_url: &str, method: &str, params: Valu
 }
 
 impl ChainProvider for EVMProvider {
-    async fn chain_info(&self) -> anyhow::Result<crate::providers::portfolio::structs::ChainInfo> {
+    async fn chain_info(&self) -> anyhow::Result<ChainInfo> {
         let hex_id: String = rpc_call(&self.rpc_url, "eth_chainId", json!([])).await?;
 
         // remove 0x and parse hex

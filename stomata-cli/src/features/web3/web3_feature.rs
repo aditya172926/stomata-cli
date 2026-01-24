@@ -41,6 +41,7 @@ use crate::{
 pub enum Web3Page {
     /// Page for validating Ethereum addresses
     AddressValidation,
+    Portfolio,
 }
 
 impl Web3Page {
@@ -48,7 +49,7 @@ impl Web3Page {
     ///
     /// Used for rendering the tab bar in the TUI.
     pub fn titles() -> Vec<&'static str> {
-        vec!["Address Validation"]
+        vec!["Address Validation", "Portfolio"]
     }
 
     /// Converts a tab index to the corresponding page
@@ -64,6 +65,7 @@ impl Web3Page {
     pub fn from_index(index: usize) -> Self {
         match index {
             0 => Web3Page::AddressValidation,
+            1 => Web3Page::Portfolio,
             _ => Web3Page::AddressValidation,
         }
     }
@@ -141,6 +143,10 @@ impl Web3State {
                 );
                 frame.render_widget(para, chunks[1]);
             }
+            Web3Page::Portfolio => {
+                let para = paragraph_widget("Setting up a simple portfolio", "Portfolio");
+                frame.render_widget(para, chunks[1]);
+            }
         }
     }
 
@@ -204,6 +210,10 @@ impl Web3State {
                 self.tab_index = 0;
                 self.current_page = Web3Page::AddressValidation;
             }
+            KeyCode::Char('2') => {
+                self.tab_index = 1;
+                self.current_page = Web3Page::Portfolio;
+            }
             _ => {}
         }
     }
@@ -261,6 +271,7 @@ pub fn run(
             let refresh_interval = Duration::from_millis(cli.interval);
             let mut last_tick = Instant::now();
 
+            /// interactive mode
             while web3_state.render {
                 let timeout = refresh_interval
                     .checked_sub(last_tick.elapsed())
