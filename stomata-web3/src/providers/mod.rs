@@ -1,5 +1,7 @@
 pub mod address;
 mod key_encryption;
+pub mod portfolio;
+pub mod rpc;
 
 pub use key_encryption::{
     encrypt_secret,
