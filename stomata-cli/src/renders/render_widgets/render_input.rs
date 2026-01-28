@@ -1,4 +1,4 @@
-use ratatui::Frame;
+use ratatui::{Frame, crossterm::event::{KeyCode, KeyEvent, KeyEventKind}, layout::{Position, Rect}, style::{Color, Style}, widgets::{Block, Paragraph}};
 
 use crate::structs::{InputMode, InputWidgetState};
 
@@ -76,5 +76,51 @@ impl InputWidgetState {
         self.reset_cursor();
     }
 
-    fn render_input(&self, frame: &mut Frame) {}
+    fn render_input(&self, input_area: Rect, frame: &mut Frame) {
+        // this is our input widget
+        let input = Paragraph::new(self.input.as_str())
+            .style(match self.input_mode {
+                InputMode::Normal => Style::default(),
+                InputMode::Editing => Style::default().fg(Color::Yellow.into())
+            })
+            .block(Block::bordered().title("Input"));
+
+        match self.input_mode {
+            // Hide the cursor. `Frame` does this by default, so we don't need to do anything here
+            InputMode::Normal => {}
+
+            // Make the cursor visible and ask ratatui to put it at the specified coordinates after
+            // rendering
+            InputMode::Editing => frame.set_cursor_position(Position::new(
+                // Draw the cursor at the current position in the input field.
+                // This position is can be controlled via the left and right arrow key
+                input_area.x + self.character_index as u16 + 1,
+                // Move one line down, from the border to the input line
+                input_area.y + 1,
+            )),
+        }
+    }
+
+    fn handle_input_events(mut self, key: KeyEvent) {
+        match self.input_mode {
+            InputMode::Normal => {
+                match key.code {
+                    KeyCode::Char('e') => {
+                        self.input_mode = InputMode::Editing
+                    }
+                    _ => {}
+                }
+            },
+            InputMode::Editing if key.kind == KeyEventKind::Press => match key.code {
+                KeyCode::Enter => self.submit_message(),
+                KeyCode::Char(to_insert) => self.enter_char(to_insert),
+                KeyCode::Backspace => self.delete_char(),
+                KeyCode::Left => self.move_cursor_left(),
+                KeyCode::Right => self.move_cursor_right(),
+                KeyCode::Esc => self.input_mode = InputMode::Normal,
+                _ => {}
+            },
+            InputMode::Editing => {}
+        }
+    }
 }
