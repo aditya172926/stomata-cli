@@ -21,10 +21,15 @@ use ratatui::{
     text::Line,
     widgets::{Block, Borders, Tabs},
 };
+use stomata_web3::providers::{
+    portfolio::{service::get_portfolio, structs::Portfolio},
+    rpc::structs::EVMProvider,
+};
 
 use crate::{
     features::web3::cli::{KeySubCommands, Web3Cli, Web3Tool},
     renders::{
+        core_displays::traits::Display,
         render_widgets::render_paragraph::paragraph_widget,
         web3_displays::{
             address_validation::validate_address,
@@ -41,6 +46,7 @@ use crate::{
 pub enum Web3Page {
     /// Page for validating Ethereum addresses
     AddressValidation,
+    Portfolio,
 }
 
 impl Web3Page {
@@ -48,7 +54,7 @@ impl Web3Page {
     ///
     /// Used for rendering the tab bar in the TUI.
     pub fn titles() -> Vec<&'static str> {
-        vec!["Address Validation"]
+        vec!["Address Validation", "Portfolio"]
     }
 
     /// Converts a tab index to the corresponding page
@@ -64,6 +70,7 @@ impl Web3Page {
     pub fn from_index(index: usize) -> Self {
         match index {
             0 => Web3Page::AddressValidation,
+            1 => Web3Page::Portfolio,
             _ => Web3Page::AddressValidation,
         }
     }
@@ -126,7 +133,7 @@ impl Web3State {
     /// # Arguments
     ///
     /// * `frame` - The ratatui frame to render into
-    pub fn render(&mut self, frame: &mut Frame) {
+    pub fn render(&mut self, frame: &mut Frame<'_>) {
         let chunks =
             Layout::vertical([Constraint::Length(3), Constraint::Min(0)]).split(frame.area());
 
@@ -135,6 +142,18 @@ impl Web3State {
 
         match &self.current_page {
             Web3Page::AddressValidation => {
+                let para = paragraph_widget(
+                    "Hi! We are adding more interactive features to Stomata Web3",
+                    "About",
+                );
+                frame.render_widget(para, chunks[1]);
+            }
+            Web3Page::Portfolio => {
+                // let provider = EVMProvider::new(
+                //     "0xdadB0d80178819F2319190D340ce9A924f783711".to_string(),
+                //     "https://rpc.fullsend.to".to_string(),
+                // );
+                // portfolio.display(frame, chunks[1], None);
                 let para = paragraph_widget(
                     "Hi! We are adding more interactive features to Stomata Web3",
                     "About",
@@ -174,9 +193,9 @@ impl Web3State {
     /// # Errors
     ///
     /// Returns an error if event processing fails.
-    pub fn handle_events(&mut self, key: KeyEvent) -> anyhow::Result<()> {
+    pub async fn handle_events(&mut self, key: KeyEvent) -> anyhow::Result<()> {
         if key.kind == KeyEventKind::Press {
-            self.process_global_events(key);
+            self.process_global_events(key).await;
         }
         Ok(())
     }
@@ -189,7 +208,7 @@ impl Web3State {
     /// # Arguments
     ///
     /// * `key` - The keyboard event to process
-    fn process_global_events(&mut self, key: KeyEvent) {
+    async fn process_global_events(&mut self, key: KeyEvent) {
         match key.code {
             KeyCode::Char('q') => {
                 self.render = false;
@@ -203,6 +222,18 @@ impl Web3State {
             KeyCode::Char('1') => {
                 self.tab_index = 0;
                 self.current_page = Web3Page::AddressValidation;
+            }
+            KeyCode::Char('2') => {
+                self.tab_index = 1;
+                // fetch the pre-requisit data
+
+                // TODO: This becomes a UI freeze logic while the async code runs on main thread. Might have to use tokio::spawn
+                // let provider = EVMProvider::new(
+                //     "0xdadB0d80178819F2319190D340ce9A924f783711".to_string(),
+                //     "https://rpc.fullsend.to".to_string(),
+                // );
+                // let portfolio = get_portfolio(provider).await.unwrap();
+                self.current_page = Web3Page::Portfolio;
             }
             _ => {}
         }
@@ -249,7 +280,7 @@ impl Web3State {
 /// let mut terminal = setup_terminal()?;
 /// run(&cli, Some(&mut terminal))?;
 /// ```
-pub fn run(
+pub async fn run(
     cli: &Cli,
     terminal: Option<&mut Terminal<CrosstermBackend<Stdout>>>,
 ) -> anyhow::Result<bool> {
@@ -261,6 +292,7 @@ pub fn run(
             let refresh_interval = Duration::from_millis(cli.interval);
             let mut last_tick = Instant::now();
 
+            /// interactive mode
             while web3_state.render {
                 let timeout = refresh_interval
                     .checked_sub(last_tick.elapsed())
@@ -270,15 +302,19 @@ pub fn run(
                 if event::poll(timeout)? {
                     if let Event::Key(key) = event::read()? {
                         // handle events
-                        web3_state.handle_events(key)?;
+                        web3_state.handle_events(key).await?;
                         // redraw immediately after an event
-                        terminal.draw(|frame| web3_state.render(frame))?;
+                        terminal.draw(|frame| {
+                            web3_state.render(frame);
+                        })?;
                     }
                 }
 
                 if last_tick.elapsed() >= refresh_interval {
                     // draw
-                    terminal.draw(|frame| web3_state.render(frame))?;
+                    terminal.draw(|frame| {
+                        web3_state.render(frame);
+                    })?;
                     last_tick = Instant::now();
                 }
             }

@@ -27,6 +27,7 @@ sysinfo = { workspace = true }
 chrono = { workspace = true }
 rpassword = "7.4.0"
 hex.workspace = true
+tokio.workspace = true
 
 [features]
 default = ["core", "web3"]

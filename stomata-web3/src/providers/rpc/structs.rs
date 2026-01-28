@@ -8,3 +8,8 @@ impl EVMProvider {
         Self { address, rpc_url }
     }
 }
+
+#[derive(Debug)]
+pub struct ChainInfo {
+    pub chain_id: u64,
+}
