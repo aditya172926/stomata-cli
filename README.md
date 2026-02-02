@@ -1,5 +1,13 @@
 <div align="center">
-  <h1>Stomata</h1>
+  <pre>
+███████╗████████╗ ██████╗ ███╗   ███╗ █████╗ ████████╗ █████╗ 
+██╔════╝╚══██╔══╝██╔═══██╗████╗ ████║██╔══██╗╚══██╔══╝██╔══██╗
+███████╗   ██║   ██║   ██║██╔████╔██║███████║   ██║   ███████║
+╚════██║   ██║   ██║   ██║██║╚██╔╝██║██╔══██║   ██║   ██╔══██║
+███████║   ██║   ╚██████╔╝██║ ╚═╝ ██║██║  ██║   ██║   ██║  ██║
+╚══════╝   ╚═╝    ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
+  </pre>
+
 
   <p>
     <strong>A lightweight real-time terminal system monitor built with Rust</strong>
@@ -20,7 +28,7 @@
 ---
 ## Demo
 
-https://github.com/user-attachments/assets/0dbe7dcc-a76e-4dd1-ae8f-233ebdf8e4e0
+![stomata demo](https://github.com/user-attachments/assets/eaf887b4-9d51-4d04-9bcc-9693031bde17)
 
 *Stomata tracking memory, swap, CPU, and per-process resource usage in real-time*
 
