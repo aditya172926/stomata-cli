@@ -1,9 +1,15 @@
-use ratatui::{Frame, crossterm::event::{KeyCode, KeyEvent, KeyEventKind}, layout::{Position, Rect}, style::{Color, Style}, widgets::{Block, Paragraph}};
+use ratatui::{
+    Frame,
+    crossterm::event::{KeyCode, KeyEvent, KeyEventKind},
+    layout::{Position, Rect},
+    style::{Color, Style},
+    widgets::{Block, Paragraph},
+};
 
 use crate::structs::{InputMode, InputWidgetState};
 
 impl InputWidgetState {
-    const fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             input: String::new(),
             character_index: 0,
@@ -76,14 +82,15 @@ impl InputWidgetState {
         self.reset_cursor();
     }
 
-    fn render_input(&self, input_area: Rect, frame: &mut Frame) {
+    pub fn render_input(&self, input_area: Rect, frame: &mut Frame) {
         // this is our input widget
         let input = Paragraph::new(self.input.as_str())
             .style(match self.input_mode {
                 InputMode::Normal => Style::default(),
-                InputMode::Editing => Style::default().fg(Color::Yellow.into())
+                InputMode::Editing => Style::default().fg(Color::Yellow.into()),
             })
             .block(Block::bordered().title("Input"));
+        frame.render_widget(input, input_area);
 
         match self.input_mode {
             // Hide the cursor. `Frame` does this by default, so we don't need to do anything here
@@ -101,15 +108,11 @@ impl InputWidgetState {
         }
     }
 
-    fn handle_input_events(mut self, key: KeyEvent) {
+    pub fn handle_input_events(&mut self, key: KeyEvent) {
         match self.input_mode {
-            InputMode::Normal => {
-                match key.code {
-                    KeyCode::Char('e') => {
-                        self.input_mode = InputMode::Editing
-                    }
-                    _ => {}
-                }
+            InputMode::Normal => match key.code {
+                KeyCode::Char('e') => self.input_mode = InputMode::Editing,
+                _ => {}
             },
             InputMode::Editing if key.kind == KeyEventKind::Press => match key.code {
                 KeyCode::Enter => self.submit_message(),

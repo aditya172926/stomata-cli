@@ -1,21 +1,29 @@
+use ratatui::layout::{Constraint, Layout};
 use stomata_web3::providers::portfolio::structs::Portfolio;
 
-use crate::renders::{
-    core_displays::traits::Display, render_widgets::render_paragraph::paragraph_widget,
+use crate::{
+    features::web3::web3_feature::Web3UIState,
+    renders::{core_displays::traits::Display, render_widgets::render_paragraph::paragraph_widget},
+    structs::InputWidgetState,
 };
 
-impl Display for Portfolio {
+impl Display<InputWidgetState> for Portfolio {
     fn display(
         &self,
         frame: &mut ratatui::Frame,
         area: ratatui::prelude::Rect,
-        ui_state: Option<&mut crate::structs::UIState>,
+        ui_state: Option<&mut InputWidgetState>,
     ) -> anyhow::Result<()> {
-        let para = paragraph_widget(
-            "Hi! We are adding more interactive features to Stomata Web3",
-            "About",
-        );
-        frame.render_widget(para, area);
+        let input_field_widget = if let Some(state) = ui_state {
+            state
+        } else {
+            &mut InputWidgetState::new()
+        };
+
+        let layout =
+            Layout::vertical([Constraint::Percentage(20), Constraint::Min(30)]).split(frame.area());
+
+        input_field_widget.render_input(layout[0], frame);
 
         Ok(())
     }

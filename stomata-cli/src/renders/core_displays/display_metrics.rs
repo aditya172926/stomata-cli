@@ -29,7 +29,7 @@ use crate::{
 ///
 /// The detailed statistics section is horizontally divided into three equal panels
 /// showing memory info, swap info, and CPU count.
-impl Display for SystemCollector {
+impl Display<()> for SystemCollector {
     /// Renders system metrics to the terminal frame
     ///
     /// Creates a vertical layout with visual gauges for quick assessment
@@ -71,7 +71,7 @@ impl Display for SystemCollector {
         &self,
         frame: &mut Frame,
         area: Rect,
-        _ui_state: Option<&mut UIState>,
+        _ui_state: Option<&mut ()>,
     ) -> anyhow::Result<()> {
         let layout = Layout::vertical([
             Constraint::Percentage(23),

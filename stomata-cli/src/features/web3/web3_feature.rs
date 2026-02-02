@@ -36,7 +36,7 @@ use crate::{
             key_encryption::{decrypt_key, delete_encrypted_key, encrypt_key, list_all_keys},
         },
     },
-    structs::Cli,
+    structs::{Cli, InputWidgetState},
 };
 
 /// Available pages in the Web3 TUI
@@ -79,7 +79,11 @@ impl Web3Page {
 /// UI-specific state for the Web3 interactive interface
 ///
 /// Currently a placeholder for future UI state management.
-pub struct Web3UIState;
+#[derive(Default)]
+pub struct Web3UIState {
+    pub input_area_state: Option<InputWidgetState>,
+    pub portfolio: Option<Portfolio>,
+}
 
 /// State manager for the Web3 feature
 ///
@@ -96,7 +100,7 @@ pub struct Web3State {
     pub tab_index: usize,
 
     /// Optional UI-specific state
-    pub ui_state: Option<Web3UIState>,
+    pub ui_state: Web3UIState,
 }
 
 impl Web3State {
@@ -108,7 +112,7 @@ impl Web3State {
             render: true,
             current_page: Web3Page::AddressValidation,
             tab_index: 0,
-            ui_state: None,
+            ui_state: Web3UIState::default(),
         }
     }
 
@@ -149,16 +153,15 @@ impl Web3State {
                 frame.render_widget(para, chunks[1]);
             }
             Web3Page::Portfolio => {
-                // let provider = EVMProvider::new(
-                //     "0xdadB0d80178819F2319190D340ce9A924f783711".to_string(),
-                //     "https://rpc.fullsend.to".to_string(),
-                // );
-                // portfolio.display(frame, chunks[1], None);
-                let para = paragraph_widget(
-                    "Hi! We are adding more interactive features to Stomata Web3",
-                    "About",
-                );
-                frame.render_widget(para, chunks[1]);
+                // rendering from ui_state
+                let portfolio = self.ui_state.portfolio.as_ref();
+                if let Some(portfolio) = portfolio {
+                    let input_widget = self
+                        .ui_state
+                        .input_area_state
+                        .get_or_insert_with(|| InputWidgetState::new());
+                    portfolio.display(frame, chunks[0], Some(input_widget));
+                }
             }
         }
     }
@@ -196,6 +199,22 @@ impl Web3State {
     pub async fn handle_events(&mut self, key: KeyEvent) -> anyhow::Result<()> {
         if key.kind == KeyEventKind::Press {
             self.process_global_events(key).await;
+            match self.current_page {
+                Web3Page::Portfolio => {
+                    match &mut self.ui_state.input_area_state {
+                        Some(input_widget_state) => {
+                            eprint!("Reached here to handle portfolio input event");
+                            input_widget_state.handle_input_events(key);
+                        }
+                        None => {
+                            // initialize the portfolio struct
+                            eprintln!("Initialize the portfolio input area struct");
+                            self.ui_state.input_area_state = Some(InputWidgetState::new());
+                        }
+                    }
+                }
+                _ => {}
+            }
         }
         Ok(())
     }
@@ -228,11 +247,12 @@ impl Web3State {
                 // fetch the pre-requisit data
 
                 // TODO: This becomes a UI freeze logic while the async code runs on main thread. Might have to use tokio::spawn
-                // let provider = EVMProvider::new(
-                //     "0xdadB0d80178819F2319190D340ce9A924f783711".to_string(),
-                //     "https://rpc.fullsend.to".to_string(),
-                // );
-                // let portfolio = get_portfolio(provider).await.unwrap();
+                let provider = EVMProvider::new(
+                    "0xdadB0d80178819F2319190D340ce9A924f783711".to_string(),
+                    "https://rpc.fullsend.to".to_string(),
+                );
+                let portfolio = get_portfolio(provider).await.unwrap();
+                self.ui_state.portfolio = Some(portfolio);
                 self.current_page = Web3Page::Portfolio;
             }
             _ => {}

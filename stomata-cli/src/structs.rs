@@ -489,12 +489,14 @@ where
 /////////////////////////
 /// Input Widget Structs
 /////////////////////////
+#[derive(Debug, Clone)]
 pub enum InputMode {
     Normal,
     Editing,
 }
 
 /// Input Widget state
+#[derive(Debug, Clone)]
 pub struct InputWidgetState {
     /// Current value of input box
     pub input: String,

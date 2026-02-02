@@ -18,7 +18,7 @@ use crate::{
 /// PID, name, CPU usage, memory usage, and status. The table supports
 /// keyboard navigation and selection tracking for drilling down into
 /// individual process details.
-impl Display for Vec<ProcessData> {
+impl Display<UIState> for Vec<ProcessData> {
     /// Renders the process list as an interactive table
     ///
     /// Creates a scrollable, selectable table showing all processes with

@@ -30,7 +30,7 @@ use ratatui::{Frame, layout::Rect};
 ///     }
 /// }
 /// ```
-pub trait Display {
+pub trait Display<S> {
     /// Renders the component to the given frame area.
     ///
     /// # Arguments
@@ -46,7 +46,7 @@ pub trait Display {
         &self,
         frame: &mut Frame,
         area: Rect,
-        ui_state: Option<&mut UIState>,
+        ui_state: Option<&mut S>,
     ) -> anyhow::Result<()>;
 }
 

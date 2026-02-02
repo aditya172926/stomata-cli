@@ -29,7 +29,7 @@ use crate::{
 ///
 /// The display automatically adapts to the number of active interfaces,
 /// distributing screen space equally among them.
-impl Display for NetworkMetrics {
+impl Display<UIState> for NetworkMetrics {
     /// Renders network metrics for all active interfaces
     ///
     /// Creates a dynamic layout that scales with the number of network interfaces.
