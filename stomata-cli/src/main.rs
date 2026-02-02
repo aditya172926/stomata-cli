@@ -15,7 +15,8 @@ mod stomata_state;
 mod structs;
 mod utils;
 
-fn main() -> anyhow::Result<()> {
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
     let enable_ui = cli.interactive;
     let mut app = StomataState::new();
@@ -39,7 +40,7 @@ fn main() -> anyhow::Result<()> {
                 }
                 AppState::RunningFeature(feature) => {
                     // Run the selected feature
-                    match run_feature(feature, &cli, Some(&mut terminal)) {
+                    match run_feature(feature, &cli, Some(&mut terminal)).await {
                         Ok(render) => {
                             if !render {
                                 app.state = AppState::FeatureSelection;

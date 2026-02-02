@@ -22,7 +22,7 @@ use crate::{
 ///
 /// The display uses vertical spacing for visual balance and center alignment
 /// for improved readability.
-impl Display for SystemInfo {
+impl Display<()> for SystemInfo {
     /// Renders the system information to the terminal UI.
     ///
     /// # Arguments
@@ -49,7 +49,7 @@ impl Display for SystemInfo {
         &self,
         frame: &mut Frame,
         area: Rect,
-        _ui_state: Option<&mut UIState>,
+        _ui_state: Option<&mut ()>,
     ) -> anyhow::Result<()> {
         let logo = r#"
 ███████╗████████╗ ██████╗ ███╗   ███╗ █████╗ ████████╗ █████╗ 

@@ -82,7 +82,7 @@ pub mod web3;
 /// Only features compiled with their corresponding feature flags will be
 /// available. Attempting to run a disabled feature will result in a
 /// compile-time error.
-pub fn run_feature(
+pub async fn run_feature(
     feature: Feature,
     cli: &Cli,
     terminal: Option<&mut Terminal<CrosstermBackend<Stdout>>>,
@@ -91,6 +91,6 @@ pub fn run_feature(
         #[cfg(feature = "core")]
         Feature::Core => core::core_feature::run(cli, terminal),
         #[cfg(feature = "web3")]
-        Feature::Web3 => web3::web3_feature::run(cli, terminal),
+        Feature::Web3 => web3::web3_feature::run(cli, terminal).await,
     }
 }
