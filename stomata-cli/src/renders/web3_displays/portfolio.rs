@@ -21,7 +21,7 @@ impl Display<InputWidgetState> for Portfolio {
         };
 
         let layout =
-            Layout::vertical([Constraint::Percentage(20), Constraint::Min(30)]).split(frame.area());
+            Layout::vertical([Constraint::Percentage(20), Constraint::Min(30)]).split(area);
 
         input_field_widget.render_input(layout[0], frame);
 

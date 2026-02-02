@@ -160,7 +160,7 @@ impl Web3State {
                         .ui_state
                         .input_area_state
                         .get_or_insert_with(|| InputWidgetState::new());
-                    portfolio.display(frame, chunks[0], Some(input_widget));
+                    portfolio.display(frame, chunks[1], Some(input_widget));
                 }
             }
         }
@@ -203,13 +203,10 @@ impl Web3State {
                 Web3Page::Portfolio => {
                     match &mut self.ui_state.input_area_state {
                         Some(input_widget_state) => {
-                            eprint!("Reached here to handle portfolio input event");
                             input_widget_state.handle_input_events(key);
                         }
                         None => {
                             // initialize the portfolio struct
-                            eprintln!("Initialize the portfolio input area struct");
-                            self.ui_state.input_area_state = Some(InputWidgetState::new());
                         }
                     }
                 }
@@ -232,10 +229,10 @@ impl Web3State {
             KeyCode::Char('q') => {
                 self.render = false;
             }
-            KeyCode::Right | KeyCode::Tab => {
+            KeyCode::Tab => {
                 self.next_tab();
             }
-            KeyCode::Left => {
+            KeyCode::BackTab => {
                 self.previous_tab();
             }
             KeyCode::Char('1') => {
