@@ -5,12 +5,14 @@ pub struct Inputs {
     pub user_address: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub enum AccountType {
+    #[default]
     EOA,
     CONTRACT,
 }
 
+#[derive(Default)]
 pub struct Portfolio {
     pub account_type: AccountType,
     pub native_balance: Decimal,

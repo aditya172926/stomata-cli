@@ -244,11 +244,12 @@ impl Web3State {
                 // fetch the pre-requisit data
 
                 // TODO: This becomes a UI freeze logic while the async code runs on main thread. Might have to use tokio::spawn
-                let provider = EVMProvider::new(
-                    "0xdadB0d80178819F2319190D340ce9A924f783711".to_string(),
-                    "https://rpc.fullsend.to".to_string(),
-                );
-                let portfolio = get_portfolio(provider).await.unwrap();
+                // let provider = EVMProvider::new(
+                //     "0xdadB0d80178819F2319190D340ce9A924f783711".to_string(),
+                //     "https://rpc.fullsend.to".to_string(),
+                // );
+                // let portfolio = get_portfolio(provider).await.unwrap();
+                let portfolio = Portfolio::default();
                 self.ui_state.portfolio = Some(portfolio);
                 self.current_page = Web3Page::Portfolio;
             }
