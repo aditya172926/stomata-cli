@@ -14,7 +14,7 @@ impl InputWidgetState {
             input: String::new(),
             character_index: 0,
             input_mode: InputMode::Normal,
-            messages: Vec::new(),
+            messages: String::new(),
         }
     }
 
@@ -77,7 +77,7 @@ impl InputWidgetState {
     }
 
     fn submit_message(&mut self) {
-        self.messages.push(self.input.clone());
+        self.messages = self.input.clone();
         self.input.clear();
         self.reset_cursor();
     }

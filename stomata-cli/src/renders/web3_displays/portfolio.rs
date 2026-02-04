@@ -25,6 +25,15 @@ impl Display<InputWidgetState> for Portfolio {
 
         input_field_widget.render_input(layout[0], frame);
 
+        // paragraph to render messages
+        let mut data;
+        if !input_field_widget.messages.is_empty() {
+            data = paragraph_widget(&input_field_widget.messages, "Input Message");
+        } else {
+            data = paragraph_widget("Input address", "Info");
+        }
+
+        frame.render_widget(data, layout[1]);
         Ok(())
     }
 }
