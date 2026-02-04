@@ -505,5 +505,5 @@ pub struct InputWidgetState {
     /// Current input mode
     pub input_mode: InputMode,
     /// Recoded message history
-    pub messages: Vec<String>,
+    pub messages: String,
 }
