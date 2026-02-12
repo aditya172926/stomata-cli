@@ -6,7 +6,16 @@ use ratatui::{
     widgets::{Block, Paragraph},
 };
 
-use crate::structs::{InputMode, InputWidgetState};
+use crate::{
+    renders::web3_displays::portfolio::get_portfolio_data,
+    structs::{InputMode, InputWidgetState},
+};
+
+pub enum InputAction {
+    Submit(String),
+    Cancel,
+    Changed(String),
+}
 
 impl InputWidgetState {
     pub const fn new() -> Self {
@@ -14,7 +23,7 @@ impl InputWidgetState {
             input: String::new(),
             character_index: 0,
             input_mode: InputMode::Normal,
-            messages: Vec::new(),
+            messages: String::new(),
         }
     }
 
@@ -77,7 +86,7 @@ impl InputWidgetState {
     }
 
     fn submit_message(&mut self) {
-        self.messages.push(self.input.clone());
+        self.messages = self.input.clone();
         self.input.clear();
         self.reset_cursor();
     }
@@ -108,22 +117,43 @@ impl InputWidgetState {
         }
     }
 
-    pub fn handle_input_events(&mut self, key: KeyEvent) {
+    pub fn handle_input_events(&mut self, key: KeyEvent) -> Option<InputAction> {
         match self.input_mode {
             InputMode::Normal => match key.code {
-                KeyCode::Char('e') => self.input_mode = InputMode::Editing,
-                _ => {}
+                KeyCode::Char('e') => {
+                    self.input_mode = InputMode::Editing;
+                    Some(InputAction::Changed(self.input.clone()))
+                }
+                _ => None,
             },
             InputMode::Editing if key.kind == KeyEventKind::Press => match key.code {
-                KeyCode::Enter => self.submit_message(),
-                KeyCode::Char(to_insert) => self.enter_char(to_insert),
-                KeyCode::Backspace => self.delete_char(),
-                KeyCode::Left => self.move_cursor_left(),
-                KeyCode::Right => self.move_cursor_right(),
-                KeyCode::Esc => self.input_mode = InputMode::Normal,
-                _ => {}
+                KeyCode::Enter => {
+                    self.submit_message();
+                    Some(InputAction::Submit(self.messages.clone()))
+                }
+                KeyCode::Char(to_insert) => {
+                    self.enter_char(to_insert);
+                    Some(InputAction::Changed(self.input.clone()))
+                }
+                KeyCode::Backspace => {
+                    self.delete_char();
+                    Some(InputAction::Changed(self.input.clone()))
+                }
+                KeyCode::Left => {
+                    self.move_cursor_left();
+                    None
+                }
+                KeyCode::Right => {
+                    self.move_cursor_right();
+                    None
+                }
+                KeyCode::Esc => {
+                    self.input_mode = InputMode::Normal;
+                    None
+                }
+                _ => None,
             },
-            InputMode::Editing => {}
+            InputMode::Editing => None,
         }
     }
 }

@@ -146,7 +146,7 @@ impl Display<UIState> for NetworkMetrics {
                     interface.total_errors_on_transmitted
                 );
                 let metadata_para_widget =
-                    paragraph_widget(&interface_metadata_info, &interface.name);
+                    paragraph_widget(interface_metadata_info, interface.name.clone());
 
                 // -- sparkline widgets --
                 let received_bytes_sparkline_title =

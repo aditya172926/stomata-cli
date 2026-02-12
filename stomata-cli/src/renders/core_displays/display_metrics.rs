@@ -132,10 +132,10 @@ impl Display<()> for SystemCollector {
         );
 
         let processes_count_text = format!("CPU count: {}", self.system_metrics.cpu_count);
-        let process_paragraph = paragraph_widget(&processes_count_text, "Processes Count");
+        let process_paragraph = paragraph_widget(processes_count_text, "Processes Count");
 
-        let paragraph = paragraph_widget(&text, "Memory Info");
-        let swap_paragraph = paragraph_widget(&text_swap, "Swap Info");
+        let paragraph = paragraph_widget(text, "Memory Info");
+        let swap_paragraph = paragraph_widget(text_swap, "Swap Info");
 
         let layout_paragraph = Layout::horizontal([
             Constraint::Percentage(33),
