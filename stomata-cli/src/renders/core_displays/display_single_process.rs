@@ -146,7 +146,7 @@ impl SingleProcessDisplay for SingleProcessUI<'_> {
             self.data.basic_process_data.status
         );
 
-        let basic_info_paragraph = paragraph_widget(&p_info, "Basic Task info");
+        let basic_info_paragraph = paragraph_widget(p_info, "Basic Task info");
         let start_timestamp = DateTime::from_timestamp_secs(self.data.start_time as i64).unwrap();
         let mut extra_info = format!(
             "Start time: {:?}\nRunning time: {}\nCWD: {}\nTotal written bytes: {}\nTotal read bytes: {}\nLatest Read bytes: {}\nLatest write bytes: {}",
@@ -164,7 +164,7 @@ impl SingleProcessDisplay for SingleProcessUI<'_> {
         if let Some(parent_pid) = self.data.parent_pid {
             extra_info.push_str(&format!("\nParent PID: {}", parent_pid.as_u32()));
         };
-        let extra_info_paragraph = paragraph_widget(&extra_info, "More info");
+        let extra_info_paragraph = paragraph_widget(extra_info, "More info");
         let cpu_gauge = render_gauge(
             self.data.basic_process_data.cpu_usage.into(),
             100.0,

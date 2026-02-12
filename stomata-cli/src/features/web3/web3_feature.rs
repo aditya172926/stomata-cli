@@ -25,15 +25,17 @@ use stomata_web3::providers::{
     portfolio::{service::get_portfolio, structs::Portfolio},
     rpc::structs::EVMProvider,
 };
+use tokio::sync::mpsc;
 
 use crate::{
     features::web3::cli::{KeySubCommands, Web3Cli, Web3Tool},
     renders::{
         core_displays::traits::Display,
-        render_widgets::render_paragraph::paragraph_widget,
+        render_widgets::{render_input::InputAction, render_paragraph::paragraph_widget},
         web3_displays::{
             address_validation::validate_address,
             key_encryption::{decrypt_key, delete_encrypted_key, encrypt_key, list_all_keys},
+            portfolio::get_portfolio_data,
         },
     },
     structs::{Cli, InputWidgetState},
@@ -83,6 +85,12 @@ impl Web3Page {
 pub struct Web3UIState {
     pub input_area_state: Option<InputWidgetState>,
     pub portfolio: Option<Portfolio>,
+    pub loading: bool,
+}
+
+pub enum Web3AppEvents {
+    PortfolioLoaded(Portfolio),
+    PortfolioError(String),
 }
 
 /// State manager for the Web3 feature
@@ -101,6 +109,12 @@ pub struct Web3State {
 
     /// Optional UI-specific state
     pub ui_state: Web3UIState,
+
+    /// channel receiver
+    pub rx: mpsc::UnboundedReceiver<Web3AppEvents>,
+
+    /// channel transmitter
+    pub tx: mpsc::UnboundedSender<Web3AppEvents>,
 }
 
 impl Web3State {
@@ -108,11 +122,14 @@ impl Web3State {
     ///
     /// Initializes to the Address Validation page with rendering enabled.
     pub fn new() -> Self {
+        let (tx, rx) = mpsc::unbounded_channel::<Web3AppEvents>();
         Self {
             render: true,
             current_page: Web3Page::AddressValidation,
             tab_index: 0,
             ui_state: Web3UIState::default(),
+            rx,
+            tx,
         }
     }
 
@@ -187,6 +204,28 @@ impl Web3State {
         frame.render_widget(tabs, area);
     }
 
+    pub fn drain_async_events(&mut self) -> bool {
+        while let Ok(event) = self.rx.try_recv() {
+            return self.apply_rx_event(event);
+        }
+        return false;
+    }
+
+    fn apply_rx_event(&mut self, event: Web3AppEvents) -> bool {
+        match event {
+            Web3AppEvents::PortfolioLoaded(portfolio_data) => {
+                self.ui_state.portfolio = Some(portfolio_data);
+                self.ui_state.loading = false;
+                true
+            }
+            Web3AppEvents::PortfolioError(err) => {
+                self.ui_state.portfolio = None;
+                self.ui_state.loading = false;
+                false
+            }
+        }
+    }
+
     /// Processes keyboard events from the user
     ///
     /// # Arguments
@@ -204,7 +243,32 @@ impl Web3State {
                 Web3Page::Portfolio => {
                     match &mut self.ui_state.input_area_state {
                         Some(input_widget_state) => {
-                            handled = input_widget_state.handle_input_events(key);
+                            match input_widget_state.handle_input_events(key) {
+                                Some(InputAction::Submit(input_data)) => {
+                                    let tx = self.tx.clone();
+                                    eprintln!("input data {:?}", input_data);
+                                    tokio::spawn(async move {
+                                        match get_portfolio_data(&input_data).await {
+                                            Ok(portfolio_data) => {
+                                                eprintln!("portfolio data {:?}", portfolio_data);
+                                                let _ = tx.send(Web3AppEvents::PortfolioLoaded(
+                                                    portfolio_data,
+                                                ));
+                                            }
+                                            Err(err) => {
+                                                eprintln!(
+                                                    "eFailed to get portfolio data {:?}",
+                                                    err
+                                                );
+                                                // let _ = tx.send(Web3AppEvents::PortfolioError(String::from("Failed to get portfolio data")));
+                                            }
+                                        }
+                                    });
+                                    handled = true;
+                                }
+                                None => {}
+                                _ => handled = true,
+                            };
                         }
                         None => {
                             // initialize the portfolio struct
@@ -314,9 +378,12 @@ pub async fn run(
             // get the refresh interval from the cli arg. Default 1000 ms
             let refresh_interval = Duration::from_millis(cli.interval);
             let mut last_tick = Instant::now();
+            let mut should_redraw = false;
 
             /// interactive mode
             while web3_state.render {
+                should_redraw = web3_state.drain_async_events();
+
                 let timeout = refresh_interval
                     .checked_sub(last_tick.elapsed())
                     .unwrap_or(Duration::from_secs(0));
@@ -327,17 +394,19 @@ pub async fn run(
                         // handle events
                         web3_state.handle_events(key).await?;
                         // redraw immediately after an event
-                        terminal.draw(|frame| {
-                            web3_state.render(frame);
-                        })?;
+                        should_redraw = true;
+                        // terminal.draw(|frame| {
+                        //     web3_state.render(frame);
+                        // })?;
                     }
                 }
 
-                if last_tick.elapsed() >= refresh_interval {
+                if should_redraw || last_tick.elapsed() >= refresh_interval {
                     // draw
                     terminal.draw(|frame| {
                         web3_state.render(frame);
                     })?;
+                    should_redraw = false;
                     last_tick = Instant::now();
                 }
             }

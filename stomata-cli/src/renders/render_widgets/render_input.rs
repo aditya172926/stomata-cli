@@ -6,7 +6,16 @@ use ratatui::{
     widgets::{Block, Paragraph},
 };
 
-use crate::{renders::web3_displays::portfolio::get_portfolio_data, structs::{InputMode, InputWidgetState}};
+use crate::{
+    renders::web3_displays::portfolio::get_portfolio_data,
+    structs::{InputMode, InputWidgetState},
+};
+
+pub enum InputAction {
+    Submit(String),
+    Cancel,
+    Changed(String),
+}
 
 impl InputWidgetState {
     pub const fn new() -> Self {
@@ -108,51 +117,43 @@ impl InputWidgetState {
         }
     }
 
-    pub fn handle_input_events(&mut self, key: KeyEvent) -> bool {
+    pub fn handle_input_events(&mut self, key: KeyEvent) -> Option<InputAction> {
         match self.input_mode {
             InputMode::Normal => match key.code {
                 KeyCode::Char('e') => {
                     self.input_mode = InputMode::Editing;
-                    true
-                },
-                _ => {false}
+                    Some(InputAction::Changed(self.input.clone()))
+                }
+                _ => None,
             },
             InputMode::Editing if key.kind == KeyEventKind::Press => match key.code {
                 KeyCode::Enter => {
-                    let input = self.input.clone();
                     self.submit_message();
-                    tokio::spawn(async move {
-                        if let Ok(portfolio_data) = get_portfolio_data(&input).await {
-                            eprintln!("portfolio data {:?}", portfolio_data)
-                        } else {
-                            eprintln!("Failed to get portfolio data");
-                        }
-                    });
-                    true
-                },
+                    Some(InputAction::Submit(self.messages.clone()))
+                }
                 KeyCode::Char(to_insert) => {
                     self.enter_char(to_insert);
-                    true
-                },
+                    Some(InputAction::Changed(self.input.clone()))
+                }
                 KeyCode::Backspace => {
                     self.delete_char();
-                    true
-                },
+                    Some(InputAction::Changed(self.input.clone()))
+                }
                 KeyCode::Left => {
                     self.move_cursor_left();
-                    true
-                },
+                    None
+                }
                 KeyCode::Right => {
                     self.move_cursor_right();
-                    true
-                },
+                    None
+                }
                 KeyCode::Esc => {
                     self.input_mode = InputMode::Normal;
-                    true
-                },
-                _ => {false}
+                    None
+                }
+                _ => None,
             },
-            InputMode::Editing => {false}
+            InputMode::Editing => None,
         }
     }
 }

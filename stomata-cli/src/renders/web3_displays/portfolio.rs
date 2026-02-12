@@ -25,22 +25,16 @@ impl Display<InputWidgetState> for Portfolio {
             &mut InputWidgetState::new()
         };
 
-        let layout =
-            Layout::vertical([Constraint::Length(3), Constraint::Min(30)]).split(area);
+        let layout = Layout::vertical([Constraint::Length(3), Constraint::Min(30)]).split(area);
 
         input_field_widget.render_input(layout[0], frame);
 
         // paragraph to render messages
         let mut data;
         if !input_field_widget.messages.is_empty() {
-            data = paragraph_widget("stuff", "Portfolio");
-            // let portfolio_data = get_portfolio_data(&input_field_widget.messages).await;
-            // if let Ok(portfolio) = portfolio_data {
-            //     let portfolio_string = format!("Account Type: {:?}, Native Balance: {:?}, Transaction count: {:?}", portfolio.account_type, portfolio.native_balance, portfolio.transaction_count);
-            //     data = paragraph_widget("stuff", "Portfolio");
-            // } else {
-            //     data = paragraph_widget("Data not found", "Error");
-            // }
+            let balance = self.native_balance.to_string();
+            eprintln!("ebalance {}", balance);
+            data = paragraph_widget(balance, "Portfolio");
         } else {
             data = paragraph_widget("Input address", "Info");
         }

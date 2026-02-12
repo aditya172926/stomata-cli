@@ -67,7 +67,7 @@ impl Display<()> for SystemInfo {
 
         let helper_instructions = "\n\n\nSwitch Tabs: Use number keys OR Tab btn OR <-, -> arrow keys\nMove selector: Up. Down arrow keys\nSelect: Enter key";
         system_info_str.push_str(helper_instructions);
-        let paragraph = paragraph_widget(&system_info_str, "System Info");
+        let paragraph = paragraph_widget(system_info_str, "System Info");
         frame.render_widget(
             paragraph.alignment(ratatui::layout::Alignment::Center),
             area,

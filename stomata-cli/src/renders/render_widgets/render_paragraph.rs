@@ -4,7 +4,10 @@
 //! and titles. Used for displaying text content like system information,
 //! help text, and status messages.
 
-use ratatui::widgets::{Block, Borders, Paragraph};
+use ratatui::{
+    text::{Line, Text},
+    widgets::{Block, Borders, Paragraph},
+};
 
 /// Creates a styled paragraph widget with a border and title.
 ///
@@ -40,6 +43,9 @@ use ratatui::widgets::{Block, Borders, Paragraph};
 ///
 /// The paragraph can be further customized after creation by chaining
 /// additional methods like `.alignment()`, `.wrap()`, or `.style()`.
-pub fn paragraph_widget<'a>(text: &'a str, title: &'a str) -> Paragraph<'a> {
+pub fn paragraph_widget<T: Into<Text<'static>>, U: Into<Line<'static>>>(
+    text: T,
+    title: U,
+) -> Paragraph<'static> {
     Paragraph::new(text).block(Block::default().borders(Borders::ALL).title(title))
 }
