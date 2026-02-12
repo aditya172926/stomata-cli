@@ -12,7 +12,7 @@ pub enum AccountType {
     CONTRACT,
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Portfolio {
     pub account_type: AccountType,
     pub native_balance: Decimal,

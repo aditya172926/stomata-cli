@@ -198,12 +198,13 @@ impl Web3State {
     /// Returns an error if event processing fails.
     pub async fn handle_events(&mut self, key: KeyEvent) -> anyhow::Result<()> {
         if key.kind == KeyEventKind::Press {
-            self.process_global_events(key).await;
+            let mut handled = false;
+
             match self.current_page {
                 Web3Page::Portfolio => {
                     match &mut self.ui_state.input_area_state {
                         Some(input_widget_state) => {
-                            input_widget_state.handle_input_events(key);
+                            handled = input_widget_state.handle_input_events(key);
                         }
                         None => {
                             // initialize the portfolio struct
@@ -211,6 +212,10 @@ impl Web3State {
                     }
                 }
                 _ => {}
+            }
+
+            if !handled {
+                self.process_global_events(key).await;
             }
         }
         Ok(())

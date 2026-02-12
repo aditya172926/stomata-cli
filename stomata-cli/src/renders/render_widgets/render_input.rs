@@ -6,7 +6,7 @@ use ratatui::{
     widgets::{Block, Paragraph},
 };
 
-use crate::structs::{InputMode, InputWidgetState};
+use crate::{renders::web3_displays::portfolio::get_portfolio_data, structs::{InputMode, InputWidgetState}};
 
 impl InputWidgetState {
     pub const fn new() -> Self {
@@ -108,22 +108,51 @@ impl InputWidgetState {
         }
     }
 
-    pub fn handle_input_events(&mut self, key: KeyEvent) {
+    pub fn handle_input_events(&mut self, key: KeyEvent) -> bool {
         match self.input_mode {
             InputMode::Normal => match key.code {
-                KeyCode::Char('e') => self.input_mode = InputMode::Editing,
-                _ => {}
+                KeyCode::Char('e') => {
+                    self.input_mode = InputMode::Editing;
+                    true
+                },
+                _ => {false}
             },
             InputMode::Editing if key.kind == KeyEventKind::Press => match key.code {
-                KeyCode::Enter => self.submit_message(),
-                KeyCode::Char(to_insert) => self.enter_char(to_insert),
-                KeyCode::Backspace => self.delete_char(),
-                KeyCode::Left => self.move_cursor_left(),
-                KeyCode::Right => self.move_cursor_right(),
-                KeyCode::Esc => self.input_mode = InputMode::Normal,
-                _ => {}
+                KeyCode::Enter => {
+                    let input = self.input.clone();
+                    self.submit_message();
+                    tokio::spawn(async move {
+                        if let Ok(portfolio_data) = get_portfolio_data(&input).await {
+                            eprintln!("portfolio data {:?}", portfolio_data)
+                        } else {
+                            eprintln!("Failed to get portfolio data");
+                        }
+                    });
+                    true
+                },
+                KeyCode::Char(to_insert) => {
+                    self.enter_char(to_insert);
+                    true
+                },
+                KeyCode::Backspace => {
+                    self.delete_char();
+                    true
+                },
+                KeyCode::Left => {
+                    self.move_cursor_left();
+                    true
+                },
+                KeyCode::Right => {
+                    self.move_cursor_right();
+                    true
+                },
+                KeyCode::Esc => {
+                    self.input_mode = InputMode::Normal;
+                    true
+                },
+                _ => {false}
             },
-            InputMode::Editing => {}
+            InputMode::Editing => {false}
         }
     }
 }

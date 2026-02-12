@@ -26,7 +26,7 @@ impl Display<InputWidgetState> for Portfolio {
         };
 
         let layout =
-            Layout::vertical([Constraint::Percentage(20), Constraint::Min(30)]).split(area);
+            Layout::vertical([Constraint::Length(3), Constraint::Min(30)]).split(area);
 
         input_field_widget.render_input(layout[0], frame);
 
@@ -50,7 +50,7 @@ impl Display<InputWidgetState> for Portfolio {
     }
 }
 
-async fn get_portfolio_data(address: &str) -> Result<Portfolio> {
+pub async fn get_portfolio_data(address: &str) -> Result<Portfolio> {
     let validated_address = AddressValidator::validate(address);
     match validated_address {
         ValidationResult::Valid { checksummed } => {
