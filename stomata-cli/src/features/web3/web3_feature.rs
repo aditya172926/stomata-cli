@@ -246,11 +246,9 @@ impl Web3State {
                             match input_widget_state.handle_input_events(key) {
                                 Some(InputAction::Submit(input_data)) => {
                                     let tx = self.tx.clone();
-                                    eprintln!("input data {:?}", input_data);
                                     tokio::spawn(async move {
                                         match get_portfolio_data(&input_data).await {
                                             Ok(portfolio_data) => {
-                                                eprintln!("portfolio data {:?}", portfolio_data);
                                                 let _ = tx.send(Web3AppEvents::PortfolioLoaded(
                                                     portfolio_data,
                                                 ));

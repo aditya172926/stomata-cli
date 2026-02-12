@@ -33,8 +33,10 @@ impl Display<InputWidgetState> for Portfolio {
         let mut data;
         if !input_field_widget.messages.is_empty() {
             let balance = self.native_balance.to_string();
-            eprintln!("ebalance {}", balance);
-            data = paragraph_widget(balance, "Portfolio");
+            let transaction_count = self.transaction_count.to_string();
+            let portfolio_data =
+                format!("Native Balance (wei): {balance}\nTransaction Count: {transaction_count}");
+            data = paragraph_widget(portfolio_data, "Portfolio");
         } else {
             data = paragraph_widget("Input address", "Info");
         }
