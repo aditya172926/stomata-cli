@@ -7,7 +7,6 @@ use stomata_web3::providers::{
 };
 
 use crate::{
-    features::web3::web3_feature::Web3UIState,
     renders::{core_displays::traits::Display, render_widgets::render_paragraph::paragraph_widget},
     structs::InputWidgetState,
 };
@@ -30,7 +29,7 @@ impl Display<InputWidgetState> for Portfolio {
         input_field_widget.render_input(layout[0], frame);
 
         // paragraph to render messages
-        let mut data;
+        let data;
         if !input_field_widget.messages.is_empty() {
             let balance = self.native_balance.to_string();
             let transaction_count = self.transaction_count.to_string();

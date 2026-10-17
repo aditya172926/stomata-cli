@@ -8,7 +8,6 @@ use std::collections::{HashMap, VecDeque};
 
 use clap::Parser;
 use ratatui::{
-    Frame,
     layout::Constraint,
     widgets::{Cell, TableState},
 };

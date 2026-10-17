@@ -9,7 +9,6 @@ use stomata_core::collectors::SystemInfo;
 
 use crate::{
     renders::{core_displays::traits::Display, render_widgets::render_paragraph::paragraph_widget},
-    structs::UIState,
 };
 
 /// Display implementation for system information.

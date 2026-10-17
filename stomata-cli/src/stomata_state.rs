@@ -19,7 +19,7 @@ use ratatui::{
 #[cfg(feature = "web3")]
 use crate::structs::Feature;
 use crate::{
-    renders::render_widgets::render_paragraph::{self, paragraph_widget},
+    renders::render_widgets::render_paragraph::paragraph_widget,
     structs::{AppState, StomataState},
 };
 
@@ -102,7 +102,7 @@ impl StomataState {
             let items: Vec<ListItem> = self
                 .available_features
                 .iter()
-                .map(|(key, feature)| {
+                .map(|(_key, feature)| {
                     let (name, desc) = match feature {
                         Feature::Core => (
                             "System Monitor",

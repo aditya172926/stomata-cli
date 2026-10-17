@@ -36,7 +36,7 @@ use crate::features::web3::cli::OutputFormat;
 fn ask_sensitive_info(ask_text: &str) -> String {
     let info = match rpassword::prompt_password(ask_text) {
         Ok(pw) => pw,
-        Err(err) => {
+        Err(_err) => {
             eprintln!("Error in reading entered data");
             exit(0)
         }

@@ -6,10 +6,7 @@ use ratatui::{
     widgets::{Block, Paragraph},
 };
 
-use crate::{
-    renders::web3_displays::portfolio::get_portfolio_data,
-    structs::{InputMode, InputWidgetState},
-};
+use crate::structs::{InputMode, InputWidgetState};
 
 pub enum InputAction {
     Submit(String),

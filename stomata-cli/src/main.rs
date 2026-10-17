@@ -1,8 +1,5 @@
-use std::time::{Duration, Instant};
-
 use crate::{
     features::run_feature,
-    renders::core_displays::display_app::App,
     structs::{AppState, Cli, StomataState},
 };
 use clap::Parser;

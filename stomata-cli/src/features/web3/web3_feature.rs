@@ -21,10 +21,7 @@ use ratatui::{
     text::Line,
     widgets::{Block, Borders, Tabs},
 };
-use stomata_web3::providers::{
-    portfolio::{service::get_portfolio, structs::Portfolio},
-    rpc::structs::EVMProvider,
-};
+use stomata_web3::providers::portfolio::structs::Portfolio;
 use tokio::sync::mpsc;
 
 use crate::{
@@ -177,7 +174,7 @@ impl Web3State {
                         .ui_state
                         .input_area_state
                         .get_or_insert_with(|| InputWidgetState::new());
-                    portfolio.display(frame, chunks[1], Some(input_widget));
+                    let _ = portfolio.display(frame, chunks[1], Some(input_widget));
                 }
             }
         }
@@ -218,7 +215,7 @@ impl Web3State {
                 self.ui_state.loading = false;
                 true
             }
-            Web3AppEvents::PortfolioError(err) => {
+            Web3AppEvents::PortfolioError(_err) => {
                 self.ui_state.portfolio = None;
                 self.ui_state.loading = false;
                 false
@@ -378,7 +375,7 @@ pub async fn run(
             let mut last_tick = Instant::now();
             let mut should_redraw = false;
 
-            /// interactive mode
+            // interactive mode
             while web3_state.render {
                 should_redraw = web3_state.drain_async_events();
 

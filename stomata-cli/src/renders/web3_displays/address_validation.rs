@@ -4,7 +4,7 @@
 //! stomata_web3 address validation system. Used for verifying address
 //! format and checksums across different blockchain networks.
 
-use stomata_web3::providers::address::{AddressValidator, ValidationResult};
+use stomata_web3::providers::address::AddressValidator;
 
 /// Validates a blockchain address and prints the validation result.
 ///
