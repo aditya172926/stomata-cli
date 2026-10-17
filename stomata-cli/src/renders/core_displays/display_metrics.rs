@@ -15,7 +15,6 @@ use crate::{
         core_displays::traits::Display,
         render_widgets::{render_gauge::render_gauge, render_paragraph::paragraph_widget},
     },
-    structs::UIState,
     utils::bytes_to_mb,
 };
 

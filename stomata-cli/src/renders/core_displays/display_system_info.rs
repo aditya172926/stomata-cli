@@ -7,9 +7,8 @@
 use ratatui::{Frame, layout::Rect};
 use stomata_core::collectors::SystemInfo;
 
-use crate::{
-    renders::{core_displays::traits::Display, render_widgets::render_paragraph::paragraph_widget},
-    structs::UIState,
+use crate::renders::{
+    core_displays::traits::Display, render_widgets::render_paragraph::paragraph_widget,
 };
 
 /// Display implementation for system information.
