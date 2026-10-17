@@ -4,17 +4,17 @@
 //! feature enums, application state, CLI arguments, page navigation,
 //! UI state management, and ring buffers for time-series data storage.
 
-use std::collections::{HashMap, VecDeque};
+use crate::constants::{CLAMP_TREND_VALUE, MAX_HISTORY_IN_MEMORY, MAX_NETWORK_IN_MEMORY};
 use clap::Parser;
 use ratatui::{
     layout::Constraint,
     widgets::{Cell, TableState},
 };
+use std::collections::{HashMap, VecDeque};
 use stomata_core::collectors::{
     network::metrics::NetworkInterfaces, process::metrics::SingleProcessData,
 };
 use sysinfo::DiskUsage;
-use crate::constants::{CLAMP_TREND_VALUE, MAX_HISTORY_IN_MEMORY, MAX_NETWORK_IN_MEMORY};
 
 /********************************************
  * ENUMS
@@ -37,7 +37,7 @@ pub enum Feature {
 /// Tracks whether the user is selecting a feature or currently running one.
 /// Used to control the main event loop and determine what to render.
 pub enum AppState {
-    FeatureSelection, // User is viewing the feature selection menu
+    FeatureSelection,        // User is viewing the feature selection menu
     RunningFeature(Feature), // User is running a specific feature
 }
 
@@ -47,11 +47,11 @@ pub enum AppState {
 /// Users can switch between pages using number keys or arrow keys.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Page {
-    System, // System information overview (OS, kernel, hostname)
-    Metrics, // Real-time metrics gauges (CPU, memory, disk usage)
-    Processes, // Sortable process list table
+    System,             // System information overview (OS, kernel, hostname)
+    Metrics,            // Real-time metrics gauges (CPU, memory, disk usage)
+    Processes,          // Sortable process list table
     SingleProcess(u32), // pid, Detailed view of a specific process with given PID
-    Network, // Network interface statistics and trends
+    Network,            // Network interface statistics and trends
 }
 
 /********************************************
@@ -63,7 +63,7 @@ pub enum Page {
 /// Manages the current application state, feature selection, and the list
 /// of available features based on compile-time configuration.
 pub struct StomataState {
-    pub state: AppState, // Current state in the application flow
+    pub state: AppState,         // Current state in the application flow
     pub selected_feature: usize, // Index of the currently selected feature in the menu
     pub available_features: HashMap<String, Feature>, // Map of available features (feature name -> Feature enum)
 }
@@ -128,17 +128,17 @@ pub struct UIState {
 #[derive(Debug)]
 pub struct ProcessesUIState {
     pub process_list: TableState, // Ratatui table state for selection and scrolling
-    pub process_count: usize, // Total number of processes in the list
+    pub process_count: usize,     // Total number of processes in the list
     pub selected_pid: Option<u32>, // PID of the selected process (if any)
 }
 
 /// Input Widget state
 #[derive(Debug, Clone)]
 pub struct InputWidgetState {
-    pub input: String, // Current value of input box
+    pub input: String,          // Current value of input box
     pub character_index: usize, // Position of cursor in input box
-    pub input_mode: InputMode, // Current input mode
-    pub messages: String, // Recoded message history
+    pub input_mode: InputMode,  // Current input mode
+    pub messages: String,       // Recoded message history
 }
 
 /////////////////////////
@@ -146,7 +146,7 @@ pub struct InputWidgetState {
 /////////////////////////
 #[derive(Debug, Clone)]
 pub enum InputMode {
-    Normal, // Keyboard input is not being captured by a text field
+    Normal,  // Keyboard input is not being captured by a text field
     Editing, // Keyboard input is being typed into a text field
 }
 
@@ -187,7 +187,7 @@ pub struct SingleProcessUI<'a> {
 /// disk usage trends in sparkline charts.
 #[derive(Debug)]
 pub struct SingleProcessDiskUsage {
-    pub pid: u32, // PID of the process being tracked
+    pub pid: u32,                        // PID of the process being tracked
     pub disk_read_usage: VecDeque<u64>, // Historical disk read bytes (up to MAX_HISTORY_IN_MEMORY points)
     pub disk_write_usage: VecDeque<u64>, // Historical disk write bytes (up to MAX_HISTORY_IN_MEMORY points)
 }
@@ -256,7 +256,6 @@ impl Default for UIState {
         }
     }
 }
-
 
 impl Default for SingleProcessDiskUsage {
     fn default() -> Self {
