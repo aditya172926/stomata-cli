@@ -11,6 +11,7 @@ mod renders;
 mod stomata_state;
 mod structs;
 mod utils;
+mod logger;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
