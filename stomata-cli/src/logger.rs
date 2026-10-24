@@ -1,4 +1,8 @@
-use std::{fs::{File, OpenOptions}, sync::{Mutex, OnceLock}, io::Write};
+use std::{
+    fs::{File, OpenOptions},
+    io::Write,
+    sync::{Mutex, OnceLock},
+};
 
 static LOG: OnceLock<Mutex<File>> = OnceLock::new();
 

@@ -163,6 +163,7 @@ impl StomataState {
             KeyCode::Enter => {
                 if let Some(&feature) = self.available_features.values().nth(self.selected_feature)
                 {
+                    log!("Selected feature {:?}", feature);
                     self.state = AppState::RunningFeature(feature);
                 }
             }

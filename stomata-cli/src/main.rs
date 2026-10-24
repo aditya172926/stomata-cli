@@ -1,3 +1,12 @@
+#[macro_use]
+mod logger;
+mod constants;
+mod features;
+mod renders;
+mod stomata_state;
+mod structs;
+mod utils;
+
 use crate::{
     features::run_feature,
     structs::{AppState, Cli, StomataState},
@@ -5,16 +14,14 @@ use crate::{
 use clap::Parser;
 use ratatui::crossterm::event::{self, Event};
 
-mod constants;
-mod features;
-mod renders;
-mod stomata_state;
-mod structs;
-mod utils;
-mod logger;
-
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    if let Ok(tty) = std::env::var("STOMATA_LOG_TTY") {
+        logger::init_log(&tty);
+    }
+
+    log!("Stomata CLI started");
+
     let cli = Cli::parse();
     let enable_ui = cli.interactive;
     let mut app = StomataState::new();
