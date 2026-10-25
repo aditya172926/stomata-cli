@@ -4,20 +4,21 @@
 //! feature enums, application state, CLI arguments, page navigation,
 //! UI state management, and ring buffers for time-series data storage.
 
-use std::collections::{HashMap, VecDeque};
-
+use crate::constants::{CLAMP_TREND_VALUE, MAX_HISTORY_IN_MEMORY, MAX_NETWORK_IN_MEMORY};
 use clap::Parser;
 use ratatui::{
-    Frame,
     layout::Constraint,
     widgets::{Cell, TableState},
 };
+use std::collections::{HashMap, VecDeque};
 use stomata_core::collectors::{
     network::metrics::NetworkInterfaces, process::metrics::SingleProcessData,
 };
 use sysinfo::DiskUsage;
 
-use crate::constants::{CLAMP_TREND_VALUE, MAX_HISTORY_IN_MEMORY, MAX_NETWORK_IN_MEMORY};
+/********************************************
+ * ENUMS
+ *********************************************/
 
 /// Available application features determined by compile-time flags.
 ///
@@ -25,13 +26,10 @@ use crate::constants::{CLAMP_TREND_VALUE, MAX_HISTORY_IN_MEMORY, MAX_NETWORK_IN_
 /// or disabled at build time using Cargo feature flags.
 #[derive(Debug, Clone, Copy)]
 pub enum Feature {
-    /// Core system monitoring features (CPU, memory, disk, network, processes)
     #[cfg(feature = "core")]
-    Core,
-
-    /// Web3 utilities (address validation, key management)
+    Core, // Core system monitoring features (CPU, memory, disk, network, processes)
     #[cfg(feature = "web3")]
-    Web3,
+    Web3, // Web3 utilities (address validation, key management)
 }
 
 /// Application state machine for managing UI flow.
@@ -39,26 +37,35 @@ pub enum Feature {
 /// Tracks whether the user is selecting a feature or currently running one.
 /// Used to control the main event loop and determine what to render.
 pub enum AppState {
-    /// User is viewing the feature selection menu
-    FeatureSelection,
-
-    /// User is running a specific feature
-    RunningFeature(Feature),
+    FeatureSelection,        // User is viewing the feature selection menu
+    RunningFeature(Feature), // User is running a specific feature
 }
+
+/// Navigation pages in the system monitoring UI.
+///
+/// Represents different views available in the core monitoring feature.
+/// Users can switch between pages using number keys or arrow keys.
+#[derive(Debug, Clone, PartialEq)]
+pub enum Page {
+    System,             // System information overview (OS, kernel, hostname)
+    Metrics,            // Real-time metrics gauges (CPU, memory, disk usage)
+    Processes,          // Sortable process list table
+    SingleProcess(u32), // pid, Detailed view of a specific process with given PID
+    Network,            // Network interface statistics and trends
+}
+
+/********************************************
+ * STRUCTS
+ *********************************************/
 
 /// Top-level application state container.
 ///
 /// Manages the current application state, feature selection, and the list
 /// of available features based on compile-time configuration.
 pub struct StomataState {
-    /// Current state in the application flow
-    pub state: AppState,
-
-    /// Index of the currently selected feature in the menu
-    pub selected_feature: usize,
-
-    /// Map of available features (feature name -> Feature enum)
-    pub available_features: HashMap<String, Feature>,
+    pub state: AppState,         // Current state in the application flow
+    pub selected_feature: usize, // Index of the currently selected feature in the menu
+    pub available_features: HashMap<String, Feature>, // Map of available features (feature name -> Feature enum)
 }
 
 /// Command-line interface arguments.
@@ -103,27 +110,106 @@ pub struct Cli {
     pub args: Vec<String>,
 }
 
-/// Navigation pages in the system monitoring UI.
+/// Comprehensive UI state management for all monitoring views.
 ///
-/// Represents different views available in the core monitoring feature.
-/// Users can switch between pages using number keys or arrow keys.
-#[derive(Debug, Clone, PartialEq)]
-pub enum Page {
-    /// System information overview (OS, kernel, hostname)
-    System,
-
-    /// Real-time metrics gauges (CPU, memory, disk usage)
-    Metrics,
-
-    /// Sortable process list table
-    Processes,
-
-    /// Detailed view of a specific process with given PID
-    SingleProcess(u32), // pid
-
-    /// Network interface statistics and trends
-    Network,
+/// Maintains state across different pages including table selections,
+/// process data, disk I/O history, and network statistics.
+#[derive(Debug)]
+pub struct UIState {
+    pub process_table: ProcessesUIState, // State for the process list table (selection, count)
+    pub single_process_disk_usage: SingleProcessDiskUsage, // Disk I/O history for the currently viewed process
+    pub networks_state: Option<HashMap<String, NetworkInterfaceData>>, // Time-series data for all network interfaces
 }
+
+/// State management for the process list table.
+///
+/// Tracks table selection, total process count, and the PID of the
+/// currently selected process for drilling down into details.
+#[derive(Debug)]
+pub struct ProcessesUIState {
+    pub process_list: TableState, // Ratatui table state for selection and scrolling
+    pub process_count: usize,     // Total number of processes in the list
+    pub selected_pid: Option<u32>, // PID of the selected process (if any)
+}
+
+/// Input Widget state
+#[derive(Debug, Clone)]
+pub struct InputWidgetState {
+    pub input: String,          // Current value of input box
+    pub character_index: usize, // Position of cursor in input box
+    pub input_mode: InputMode,  // Current input mode
+    pub messages: String,       // Recoded message history
+}
+
+/////////////////////////
+/// Input Widget Structs
+/////////////////////////
+#[derive(Debug, Clone)]
+pub enum InputMode {
+    Normal,  // Keyboard input is not being captured by a text field
+    Editing, // Keyboard input is being typed into a text field
+}
+
+/// Fixed-size ring buffer for time-series data storage.
+///
+/// Efficiently stores a bounded history of measurements using a circular
+/// buffer. When capacity is reached, oldest values are automatically
+/// discarded (FIFO behavior).
+///
+/// # Type Parameters
+///
+/// * `T` - Element type
+/// * `N` - Maximum capacity (compile-time constant)
+///
+/// # Examples
+///
+/// ```ignore
+/// let mut ring: Ring<u64, 100> = Ring::new();
+/// ring.push(42);
+/// ring.push(100);
+/// // After 100 pushes, oldest values automatically removed
+/// ```
+#[derive(Debug)]
+pub struct Ring<T, const N: usize> {
+    inner: VecDeque<T>,
+}
+
+/// Wrapper for single process data display.
+///
+/// Used to pass process details to the detailed process view.
+pub struct SingleProcessUI<'a> {
+    pub data: SingleProcessData<'a>, // Process data including metrics and metadata
+}
+
+/// Time-series storage for a single process's disk I/O activity.
+///
+/// Maintains historical read and write byte counts for visualizing
+/// disk usage trends in sparkline charts.
+#[derive(Debug)]
+pub struct SingleProcessDiskUsage {
+    pub pid: u32,                        // PID of the process being tracked
+    pub disk_read_usage: VecDeque<u64>, // Historical disk read bytes (up to MAX_HISTORY_IN_MEMORY points)
+    pub disk_write_usage: VecDeque<u64>, // Historical disk write bytes (up to MAX_HISTORY_IN_MEMORY points)
+}
+
+/// Time-series storage for a single network interface's statistics.
+///
+/// Maintains historical data for bytes, packets, and errors in both
+/// transmit and receive directions using ring buffers for efficient
+/// memory usage and visualization.
+#[derive(Debug)]
+pub struct NetworkInterfaceData {
+    pub received_bytes: Ring<u64, MAX_NETWORK_IN_MEMORY>, // Bytes received over time
+    pub transmitted_bytes: Ring<u64, MAX_NETWORK_IN_MEMORY>, // Bytes transmitted over time
+    pub packets_received: Ring<u64, MAX_NETWORK_IN_MEMORY>, // Packets received over time
+    pub packets_transmitted: Ring<u64, MAX_NETWORK_IN_MEMORY>, // Packets transmitted over time
+    pub errors_received: Ring<u64, MAX_NETWORK_IN_MEMORY>, // Receive errors over time
+    pub errors_transmitted: Ring<u64, MAX_NETWORK_IN_MEMORY>, // Transmit errors over time
+}
+
+/********************************************
+ * IMPLS
+ *********************************************/
 
 impl Page {
     /// Returns tab titles for the main navigation pages.
@@ -157,70 +243,6 @@ impl Page {
     }
 }
 
-/// Trait for types that can be displayed as table rows.
-///
-/// Provides a consistent interface for converting data structures into
-/// table cells with appropriate column widths for ratatui tables.
-///
-/// # Examples
-///
-/// ```ignore
-/// impl TableRow for MyData {
-///     fn to_cells(&self) -> Vec<Cell<'_>> {
-///         vec![
-///             Cell::from(self.id.to_string()),
-///             Cell::from(self.name.clone()),
-///         ]
-///     }
-///
-///     fn column_widths() -> Vec<Constraint> {
-///         vec![
-///             Constraint::Length(10),
-///             Constraint::Min(20),
-///         ]
-///     }
-/// }
-/// ```
-pub trait TableRow {
-    /// Converts the data into a vector of table cells.
-    fn to_cells(&self) -> Vec<Cell<'_>>;
-
-    /// Returns the column width constraints for the table.
-    fn column_widths() -> Vec<Constraint>;
-}
-
-/// Comprehensive UI state management for all monitoring views.
-///
-/// Maintains state across different pages including table selections,
-/// process data, disk I/O history, and network statistics.
-#[derive(Debug)]
-pub struct UIState {
-    /// State for the process list table (selection, count)
-    pub process_table: ProcessesUIState,
-
-    /// Disk I/O history for the currently viewed process
-    pub single_process_disk_usage: SingleProcessDiskUsage,
-
-    /// Time-series data for all network interfaces
-    pub networks_state: Option<HashMap<String, NetworkInterfaceData>>,
-}
-
-/// State management for the process list table.
-///
-/// Tracks table selection, total process count, and the PID of the
-/// currently selected process for drilling down into details.
-#[derive(Debug)]
-pub struct ProcessesUIState {
-    /// Ratatui table state for selection and scrolling
-    pub process_list: TableState,
-
-    /// Total number of processes in the list
-    pub process_count: usize,
-
-    /// PID of the selected process (if any)
-    pub selected_pid: Option<u32>,
-}
-
 impl Default for UIState {
     fn default() -> Self {
         Self {
@@ -233,30 +255,6 @@ impl Default for UIState {
             networks_state: None,
         }
     }
-}
-
-/// Wrapper for single process data display.
-///
-/// Used to pass process details to the detailed process view.
-pub struct SingleProcessUI<'a> {
-    /// Process data including metrics and metadata
-    pub data: SingleProcessData<'a>,
-}
-
-/// Time-series storage for a single process's disk I/O activity.
-///
-/// Maintains historical read and write byte counts for visualizing
-/// disk usage trends in sparkline charts.
-#[derive(Debug)]
-pub struct SingleProcessDiskUsage {
-    /// PID of the process being tracked
-    pub pid: u32,
-
-    /// Historical disk read bytes (up to MAX_HISTORY_IN_MEMORY points)
-    pub disk_read_usage: VecDeque<u64>,
-
-    /// Historical disk write bytes (up to MAX_HISTORY_IN_MEMORY points)
-    pub disk_write_usage: VecDeque<u64>,
 }
 
 impl Default for SingleProcessDiskUsage {
@@ -305,27 +303,6 @@ impl SingleProcessDiskUsage {
     }
 }
 
-/// Time-series storage for a single network interface's statistics.
-///
-/// Maintains historical data for bytes, packets, and errors in both
-/// transmit and receive directions using ring buffers for efficient
-/// memory usage and visualization.
-#[derive(Debug)]
-pub struct NetworkInterfaceData {
-    /// Bytes received over time
-    pub received_bytes: Ring<u64, MAX_NETWORK_IN_MEMORY>,
-    /// Bytes transmitted over time
-    pub transmitted_bytes: Ring<u64, MAX_NETWORK_IN_MEMORY>,
-    /// Packets received over time
-    pub packets_received: Ring<u64, MAX_NETWORK_IN_MEMORY>,
-    /// Packets transmitted over time
-    pub packets_transmitted: Ring<u64, MAX_NETWORK_IN_MEMORY>,
-    /// Receive errors over time
-    pub errors_received: Ring<u64, MAX_NETWORK_IN_MEMORY>,
-    /// Transmit errors over time
-    pub errors_transmitted: Ring<u64, MAX_NETWORK_IN_MEMORY>,
-}
-
 impl Default for NetworkInterfaceData {
     fn default() -> Self {
         Self {
@@ -367,30 +344,6 @@ impl NetworkInterfaceData {
         self.errors_transmitted
             .push_clamped(network_data.errors_on_transmitted);
     }
-}
-
-/// Fixed-size ring buffer for time-series data storage.
-///
-/// Efficiently stores a bounded history of measurements using a circular
-/// buffer. When capacity is reached, oldest values are automatically
-/// discarded (FIFO behavior).
-///
-/// # Type Parameters
-///
-/// * `T` - Element type
-/// * `N` - Maximum capacity (compile-time constant)
-///
-/// # Examples
-///
-/// ```ignore
-/// let mut ring: Ring<u64, 100> = Ring::new();
-/// ring.push(42);
-/// ring.push(100);
-/// // After 100 pushes, oldest values automatically removed
-/// ```
-#[derive(Debug)]
-pub struct Ring<T, const N: usize> {
-    inner: VecDeque<T>,
 }
 
 impl<T, const N: usize> Ring<T, N> {
@@ -486,24 +439,34 @@ where
     }
 }
 
-/////////////////////////
-/// Input Widget Structs
-/////////////////////////
-#[derive(Debug, Clone)]
-pub enum InputMode {
-    Normal,
-    Editing,
-}
+/// Trait for types that can be displayed as table rows.
+///
+/// Provides a consistent interface for converting data structures into
+/// table cells with appropriate column widths for ratatui tables.
+///
+/// # Examples
+///
+/// ```ignore
+/// impl TableRow for MyData {
+///     fn to_cells(&self) -> Vec<Cell<'_>> {
+///         vec![
+///             Cell::from(self.id.to_string()),
+///             Cell::from(self.name.clone()),
+///         ]
+///     }
+///
+///     fn column_widths() -> Vec<Constraint> {
+///         vec![
+///             Constraint::Length(10),
+///             Constraint::Min(20),
+///         ]
+///     }
+/// }
+/// ```
+pub trait TableRow {
+    /// Converts the data into a vector of table cells.
+    fn to_cells(&self) -> Vec<Cell<'_>>;
 
-/// Input Widget state
-#[derive(Debug, Clone)]
-pub struct InputWidgetState {
-    /// Current value of input box
-    pub input: String,
-    /// Position of cursor in input box
-    pub character_index: usize,
-    /// Current input mode
-    pub input_mode: InputMode,
-    /// Recoded message history
-    pub messages: String,
+    /// Returns the column width constraints for the table.
+    fn column_widths() -> Vec<Constraint>;
 }
