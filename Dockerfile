@@ -13,7 +13,7 @@ RUN cargo build --release --bin stomata
 FROM debian:bookworm-slim
 
 # Install runtime dependencies for TUI
-RUN apt-get update && apt-get upgrade && apt-get install -y \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
