@@ -34,5 +34,5 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/stomata:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/stomata:${{ steps.version.outputs.version }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/stomata-cli:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/stomata-cli:${{ steps.version.outputs.version }}
