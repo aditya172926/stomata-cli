@@ -2057,7 +2057,7 @@ dependencies = [
 
 [[package]]
 name = "stomata-core"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "anyhow",
  "chrono",
@@ -2067,7 +2067,7 @@ dependencies = [
 
 [[package]]
 name = "stomata-web3"
-version = "0.0.2"
+version = "0.0.3"
 dependencies = [
  "aes-gcm",
  "anyhow",

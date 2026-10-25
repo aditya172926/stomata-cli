@@ -8,7 +8,7 @@ members = [
 resolver = "3"   # use edition 2024 feature resolver
 
 [workspace.package]
-version = "0.2.1"
+version = "0.2.2"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 authors = ["Aditya Singh aditya26sg@gmail.com"]
