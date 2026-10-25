@@ -20,7 +20,7 @@ async fn main() -> anyhow::Result<()> {
         logger::init_log(&tty);
     }
 
-    log!("Stomata CLI started");
+    info!("Stomata CLI started");
 
     let cli = Cli::parse();
     let enable_ui = cli.interactive;
