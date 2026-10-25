@@ -1,6 +1,6 @@
 [package]
 name = "stomata-web3"
-version = "0.0.2"
+version = "0.0.3"
 description = "Web3 library to work with Stomata cli or used independently"
 edition.workspace = true
 license.workspace = true

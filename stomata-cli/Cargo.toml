@@ -21,8 +21,8 @@ cargo.features = "all"
 ratatui = "0.29.0"
 anyhow = { workspace = true }
 clap = { version = "=4.5.50", features = ["derive"] }
-stomata-core = { version = "=0.1.5", path = '../stomata-core', optional = true }
-stomata-web3 = { version = "=0.0.2", path = '../stomata-web3', optional = true }
+stomata-core = { version = "=0.1.6", path = '../stomata-core', optional = true }
+stomata-web3 = { version = "=0.0.3", path = '../stomata-web3', optional = true }
 sysinfo = { workspace = true }
 chrono = { workspace = true }
 rpassword = "=7.4.0"
